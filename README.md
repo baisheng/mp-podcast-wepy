@@ -32,4 +32,4 @@ A Podcast miniprogram project, 一款播课类小程序
 
 ## 小程序码
 
-<img src="https://github.com/baisheng/mp-podcast-wepy/blob/master/doc/2-playing.png?raw=true" alt="Podcast" title="小程序" width="175" />
+<img src="https://github.com/baisheng/mp-podcast-wepy/blob/master/doc/wechat.jpg?raw=true" alt="Podcast" title="小程序" width="175" />
