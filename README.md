@@ -2,6 +2,9 @@ MpPodcast
 ==========
 A Podcast miniprogram project, 一款播课类小程序
 
+MpVue 版本
+> [https://github.com/baisheng/mp-podcast-mpvue](https://github.com/baisheng/mp-podcast-mpvue)
+
 ## 简介
 这是一个类播客类的小程序，功能包括内容推荐、音频播放、内容评论、收藏，主播详情、节目详情等内容。
 功能上主要是以下几项：
