@@ -1,0 +1,94 @@
+<template>
+  <!--<repeat wx:for="{{list}}" key="index" index="index" item="item">-->
+    <!--<view wx:for="{{list}}">-->
+    <!--<podcast-card :item.sync="item"></podcast-card>-->
+    <!--</view>-->
+  <!--</repeat>-->
+</template>
+<script>
+  import wepy from 'wepy'
+  import PodcastCard from '../components/podcast-card'
+  //  import PodcastHeader from './podcast-card'
+  //  import FoldableCard from '../components/FoldableCard'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  import {api} from '../config'
+  import moment from 'moment'
+  //  import http from '../utils/request'
+  export default class Index extends wepy.component {
+    mixins = [base, http]
+    components = {
+      'podcast-card': PodcastCard
+    }
+    data = {
+      page: 1,
+      list: []
+    }
+    methods = {
+    }
+    events = {
+      'onload': ($event) => {
+      }
+    };
+    /**
+     * lifecycles hook
+     */
+    async onComponentLoad () {
+      await this.loadData()
+      this.$apply()
+    }
+    async onReload () {
+      this.page = 1
+      await this.loadData()
+    }
+
+    async onPullDownRefresh() {
+      this.page = 1
+      await this.loadData()
+    }
+
+    async onReachBottom () {
+      this.page++
+      await this.loadData()
+    }
+
+    async loadData () {
+      const req = Object.assign({}, api.common.list, {data: {page: this.page}})
+      await this.$request(req, {
+        success: async ({code, data}) => {
+          if (this.page === 1) {
+            this.list = data.data
+          } else {
+            this.list.push(...data.data)
+          }
+          for (let item of this.list) {
+            item._ = {
+              header_collapsed: false,
+              expanded: true
+            }
+            item.modified = moment(item.modified).fromNow()
+            await this.loadChildList(item, item.id)
+          }
+          wepy.stopPullDownRefresh()
+          this.$apply()
+        },
+        fail: (statusCode, data) => {
+          wepy.showModal({
+            title: '提示',
+            content: `加载列表失败,请重试或联系我们。${statusCode}`
+          })
+        }
+      })
+    }
+
+    async loadChildList(item, parent) {
+      const req = Object.assign({}, api.common.get, {data: {parent: parent}})
+      await this.$request(req, {
+        success: ({code, data}) => {
+          item.list = data
+          this.$apply()
+        }
+      })
+    }
+  }
+</script>

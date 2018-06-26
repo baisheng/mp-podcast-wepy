@@ -1,0 +1,154 @@
+<style lang="scss">
+  @import '../stylesheets/style';
+
+  $bgcolor: #EFEFF4;
+  .me {
+    background-color: $gray-light;
+    height: 100%;
+    padding-top: rpx(40);
+    .info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      .avatar {
+        width: rpx(130);
+        height: rpx(130);
+        border-radius: 50%;
+      }
+      .nickname {
+        color: #aaa;
+        padding: 10px;
+        font-size: rpx(32);
+      }
+    }
+    .item {
+      background-color: #fff;
+      height: rpx(100);
+      position: relative;
+      box-sizing: border-box;
+      padding: rpx(15) rpx(25);
+      border-bottom: 1px solid #eee;
+    }
+  }
+
+  $border: 1px solid #eeeeee;
+  .list {
+    margin-top: rpx(40);
+    background-color: #fff;
+    border-bottom: $border;
+    display: flex;
+    flex-direction: column;
+    color: grey;
+
+    .item {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      height: rpx(100);
+      /*position: relative;*/
+      /*-webkit-box-sizing: border-box;*/
+      /*-moz-box-sizing: border-box;*/
+      box-sizing: border-box;
+      padding: rpx(20);
+      border-bottom: $border;
+
+      .icon {
+        width: rpx(48);
+        height: rpx(48);
+        margin-left: rpx(15);
+      }
+      .arrow_left {
+        /*right: rpx(20);*/
+        width: rpx(30);
+        height: rpx(40);
+      }
+      .title {
+        margin-left: rpx(30);
+        flex: 1;
+        text-align: left;
+        font-size: rpx(33);
+      }
+      .say {
+        color: #A1a1a1;
+        font-size: rpx(24);
+      }
+    }
+  }
+</style>
+<template>
+  <view class="me">
+    <view class="info">
+      <image class="avatar" src="{{ userInfo.avatarUrl }}" background-size="cover"/>
+      <view class="nickname">{{ userInfo.nickName }}</view>
+    </view>
+
+    <view class="list">
+      <!--<block wx:for-items="{{list}}" wx:for-index="index" wx:for-item="item">-->
+      <view class="item">
+        <image class="icon" src="../../images/icon/icon-user-like.svg"></image>
+        <text class="title">我喜欢的 ({{profile.likes}})</text>
+        <view class="say" style="color:#A1a1a1;"> (敬请期待)</view>
+        <!--<image class="arrow_left" src="../images/arrow_left.png"></image>-->
+      </view>
+      <view class="item">
+        <image class="icon" src="../../images/icon/icon-feed-active.svg"></image>
+        <text class="title">我的柚道</text>
+        <view class="say" style="color:#A1a1a1;"> (敬请期待)</view>
+      </view>
+      <view class="item">
+        <image class="icon" src="../../images/icon/icon-qa-active.svg"></image>
+        <text class="title">我的柚答</text>
+        <view class="say" style="color:#A1a1a1;"> (敬请期待)</view>
+        <!--<image class="arrow_left" src="../images/arrow_left.png"></image>-->
+      </view>
+      <!--</block>-->
+    </view>
+  </view>
+</template>
+
+<script>
+  /* eslint-disable no-useless-return,no-multi-spaces */
+  import wepy from 'wepy'
+  import base from '../mixins/_base'
+  import auth from '../api/auth'
+  import user from '../api/users'
+
+  const $wxapp = wepy.$instance
+  export default class profile extends wepy.component {
+    mixins = [base]
+    data = {
+      profile: {
+        likeds: 0
+      },
+      userInfo: {
+        nickName: '加载中...',
+        // 头像占位图
+        avatarUrl: 'data:image/png;base64,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',
+        packages: {
+          times: 0,
+          status: '阅读状态'
+        },
+        identity: {
+          type: '订阅状态',
+          collection: 0
+        }
+      }
+    }
+    async onLoad () {
+//      console.log('alala - - on load me ')
+    }
+    async onShow () {
+//      console.log('lalala --on shoe me ')
+      // 权限校验
+      const result = await auth.user({block: true, redirect: true})
+      if (!result) return
+      this.userInfo = JSON.parse($wxapp.globalData.auth.user)
+      this.loaded()
+      this.profile = await user.me()
+      this.loaded()
+    }
+    computed = {
+    }
+  }
+</script>

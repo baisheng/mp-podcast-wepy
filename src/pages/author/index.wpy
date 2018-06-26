@@ -1,0 +1,358 @@
+<style type="scss" scoped>
+  @import '../../stylesheets/shared/functions';
+
+  Page, .body {
+    font-family: '\5FAE\8F6F\96C5\9ED1', arial;
+    /*background: #FAFAFC;*/
+    background: #ECEDF0;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /*box-sizing: border-box;*/
+    position: relative;
+  }
+
+  .title {
+    display: inline-flex;
+    font-size: rpx(28);
+    margin: rpx(30) 0 rpx(30) rpx(30);
+    color: #4A4A4A;
+  }
+
+  .resume {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-size: rpx(26);
+    color: #808080;
+    .summary {
+      min-height: rpx(100);
+      background: #fff;
+      box-shadow: 0 -4px 30px 0 rgba(0, 0, 0, 0.10);
+      display: flex;
+      align-items: center;
+      text-align: left;
+      width: auto;
+      line-height: rpx(40);
+      font-size: rpx(28);
+      padding: rpx(30);
+      margin: 0 auto;
+      margin-bottom: rpx(20);
+      /*padding-bottom: rpx(20);*/
+      &.is-fold {
+        /*padding: rpx(30);*/
+        /*padding: 0 rpx(30) rpx(30) rpx(30);*/
+        /*position: relative;*/
+        /*overflow: hidden;*/
+        /*text {*/
+        /*color: #4A4A4A;*/
+        /*word-break: break-all;*/
+        /*text-overflow: ellipsis;*/
+        /*display: -webkit-box; !** 对象作为伸缩盒子模型显示 **!*/
+        /*-webkit-box-orient: vertical; !** 设置或检索伸缩盒对象的子元素的排列方式 **!*/
+        /*-webkit-line-clamp: 5; !** 显示的行数 **!*/
+        /*overflow: hidden; !** 隐藏超出的内容 **!*/
+        /*}*/
+        /*margin-bottom: rpx(10);*/
+      }
+      .is-expand {
+        padding: rpx(30);
+        /*padding: 0 0 rpx(20) 0;*/
+        position: relative;
+        overflow: hidden;
+        text {
+          color: #4A4A4A;
+        }
+      }
+      .more {
+        position: absolute;
+        bottom: 0;
+        left: 4px;
+        right: 4px;
+        text-align: center;
+        cursor: pointer;
+        padding: rpx(10) 0;
+        width: 100%;
+        color: #000;
+        &:after {
+          font-weight: 800;
+          content: "";
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          z-index: 1;
+          box-shadow: inset 0 rpx(-15) rpx(30) #fff;
+          background: linear-gradient(180deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, .1));
+          filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#00ffffff", endColorstr="#ccffffff", GradientType=0);
+        }
+      }
+    }
+  }
+
+  #anchor {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    height: rpx(200);
+    background: #fff;
+    .avatar {
+      width: rpx(120);
+      height: rpx(120);
+      margin-left: rpx(30);
+      background-position: center center;
+      border: 1px solid #efefef;
+      border-radius: rpx(16);
+      /*border-radius: 50%;*/
+    }
+    .info {
+      margin-left: rpx(30);
+      display: flex;
+      flex-direction: column;
+      /*justify-content: space-between;*/
+      line-height: rpx(60);
+      .name {
+        font-size: rpx(38);
+      }
+      .detail {
+        font-size: rpx(28);
+        color: rgba(0, 0, 0, 0.54);
+      }
+    }
+
+  }
+
+  #author {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    height: rpx(240);
+    &__avatar {
+      width: rpx(200);
+      height: rpx(200);
+    }
+  }
+
+  .navigator-arrow {
+    padding-right: rpx(26);
+    position: relative;
+  }
+
+  .navigator-arrow:after {
+    content: " ";
+    display: inline-block;
+    height: rpx(18);
+    width: rpx(18);
+    border-width: rpx(2) rpx(2) 0 0;
+    border-color: #888888;
+    border-style: solid;
+    transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
+    position: absolute;
+    top: 50%;
+    margin-top: rpx(-8);
+    right: rpx(28);
+  }
+</style>
+
+<template>
+  <view class="body">
+    <view id="anchor">
+      <image class="avatar" src="{{detail.avatar}}" backbround-size="cover" mode="aspectFill"></image>
+      <view class="info">
+        <text class="name">{{detail.nicename}}</text>
+        <text class="detail">{{detail.resume.highlights}}</text>
+      </view>
+    </view>
+    <view class="resume">
+      <view class="title">名师介绍</view>
+      <view class="summary" @tap="bindViewContentEvent">
+        <view wx:if="{{isExpandSource}}" class="is-expanded">
+          {{detail.resume.summary}}
+        </view>
+        <elip :line="line" wx:else>
+          {{detail.resume.summary}}
+        </elip>
+        <!--<text>-->
+        <!--{{detail.resume.summary}}-->
+        <!--</text>-->
+        <view class="more">
+          <!--<text class="icon-ios-arrow-down"></text>-->
+          <text class="icon-ios-arrow-{{isExpandSource ? 'up' : 'down'}}"></text>
+        </view>
+      </view>
+
+    </view>
+
+    <view class="title">{{detail.nicename}} 老师的柚道</view>
+    <repeat for="{{list}}" key="index" index="index" item="item">
+      <!--this.$root.$navigate(`/pages/detail/index?id=${item.id}&parent=${item.id}`)-->
+      <navigator url="/pages/detail/index?id={{ item.id }}&parent={{ item.id }}">
+        <card>
+          <view slot="header">
+            {{ item.title }}
+
+          </view>
+          <view slot="summary">
+            <!--<navigator url="/pages/detail/index?id={{ item.id }}&parent={{ item.id }}">-->
+            <view class="navigator-arrow"></view>
+            <!--</navigator>-->
+          </view>
+        </card>
+      </navigator>
+    </repeat>
+  </view>
+</template>
+<script>
+  /* eslint-disable no-undef,no-unused-vars */
+  import wepy from 'wepy'
+  import base from '../../mixins/_base'
+  import authorApi from '../../api/author'
+  import podcastApi from '../../api/podcast'
+  import Card from '../../components/FoldableCard'
+  import Box from '../../components/ui/p-box/index'
+  import BoxDemo from '../../components/ui/p-box/card'
+  import Elip from '../../components/ui/elip'
+
+  const $wxapp = wepy.$instance
+  let seek = 0
+
+  export default class Detail extends wepy.page {
+    components = {
+      card: Card,
+      box: Box,
+      demo: BoxDemo,
+      elip: Elip
+    }
+    mixins = [base]
+    config = {
+//      'navigationBarTitleText': '育儿柚道',
+//      'navigationBarTextStyle': 'white',
+//      'navigationBarBackgroundColor': '#3b3a40',
+      'disableScroll': false
+    }
+    data = {
+      detail: {},
+      list: [],
+      line: 3,
+      animationData: null,
+//      }),
+//      item: {
+//        play_status: 'stop'
+//      },
+      src: '',
+      mode: 'loop',
+      loading: true,
+      downloadPercent: 0,
+      percent: 50,
+      playing: false,
+      curplay: {
+        play_status: 'stop'
+      },
+      isExpandSource: false
+    }
+    props = {
+      option: Object
+    }
+    computed = {
+      playing () {
+        return $wxapp.globalData.curplay.play_status === 'playing'
+      }
+    }
+    methods = {
+      navToDetail (id) {
+        this.$root.$direct(`/pages/detail/index?id=${id}&parent=${id}`)
+      },
+      bindViewContentEvent () {
+        this.isExpandSource = !this.isExpandSource
+      },
+      share () {
+        wx.showShareMenu({
+          withShareTicket: true
+        })
+      },
+      pauseAll () {
+        if (this.curplay.play_status === 'playing') {
+          this.curplay.play_status = 'stop'
+          $wxapp.pauseMusic()
+        }
+      },
+      playAll () {
+        $wxapp.globalData.playlist = this.list
+        this.curplay.play_status = 'playing'
+        $wxapp.globalData.curplay = Object.assign({}, this.list[0], {play_status: 'playing'})
+        $wxapp.globalData.playindex = 0
+        $wxapp.playing()
+        $wxapp.emitter.emit('playing')
+//        $wxapp.playing()
+      },
+      playItem (song, e) {
+        wx.showToast({
+          title: '加载中',
+          icon: 'loading',
+          duration: 1000
+        })
+
+        if (this.curplay.id === song.id) {
+//          console.log('当前暂停')
+          if (this.curplay.play_status === 'playing') {
+            this.curplay.play_status = 'stop'
+            $wxapp.stopMusic()
+          } else {
+            this.curplay.play_status = 'playing'
+            $wxapp.playing()
+          }
+        } else {
+          this.curplay.play_status = 'playing'
+          this.curplay = Object.assign({}, song, {play_status: 'playing'})
+          $wxapp.globalData.curplay = this.curplay
+          $wxapp.playing()
+        }
+        $wxapp.emitter.emit('playing')
+      },
+      museek (e) {
+        let nextime = e.detail.value
+        const that = this
+        nextime = $wxapp.globalData.curplay.dt * nextime / 100000
+        $wxapp.globalData.currentPosition = nextime
+        $wxapp.seekMusic(1, $wxapp.globalData.currentPosition, () => {
+          this.percent = e.detail.value
+          that.$apply()
+        })
+      }
+    }
+
+    onShow () {
+      const that = this
+      if (that.curplay.play_status === 'playing') {
+        $wxapp.playAlrc(that)
+        seek = setInterval(() => {
+          $wxapp.playAlrc(that)
+        }, 1000)
+      }
+      if (this.curplay.play_status === 'stop') {
+        clearInterval(seek)
+      }
+    }
+
+    onShareAppMessage () {
+      return {
+        title: '育儿柚道',
+        desc: this.item.name,
+        path: '/pages/detail?id=' + this.item.id
+      }
+    }
+
+    async onLoad (option) {
+//      option.id = 'yeqing'
+      this.detail = await authorApi.detail(option.id)
+      const data = await podcastApi.findByAuthor(this.detail.id)
+      this.list = data.data
+      this.loaded()
+    }
+  }
+</script>

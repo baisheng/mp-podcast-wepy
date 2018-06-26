@@ -1,0 +1,157 @@
+<template>
+
+  <view class="body">
+    <view>
+      浏览
+    </view>
+    <view wx:if="{{currentTab === 0}}">
+      <ad-swiper :config.sync="swiper"></ad-swiper>
+    </view>
+    <view class="tab_item">
+      <repeat for="{{page.list}}" key="index" index="index" item="item">
+        <podcast-card :item.sync="item" :id="item.id" style="margin-top: 20px"></podcast-card>
+      </repeat>
+
+      <!-- 加载提示 -->
+      <Loadmore :page.sync="page"></Loadmore>
+      <view style="height: 100rpx;"></view>
+    </view>
+    <me class="tab_item" wx:if="{{currentTab === 1}}"></me>
+    <tab-bar :active.sync="currentTab" :curplay.sync="curplay"></tab-bar>
+  </view>
+</template>
+
+<script>
+
+  /* eslint-disable no-undef,no-throw-literal,no-unused-expressions,no-unused-vars */
+  import wepy from 'wepy'
+  import base from '../../mixins/_base'
+  import pagination from '../../mixins/pagination'
+
+  import auth from '../../api/auth'
+  import app from '../../api/app'
+  import podcast from '../../api/podcast'
+  import Cache from '../../utils/Cache'
+  import Tips from '../../utils/Tips'
+  //  import WxUtils from '../../utils/WxUtils'
+  import Event from '../../utils/Event'
+  //  import Copyright from '../../components/common/copyright'
+  import Loadmore from '../../components/ui/loadmore'
+  import AdSwiper from '../../components/AdSwiper'
+  import TabBar from '../../components/TabBar'
+  import Me from '../../components/profile'
+  import PodcastCard from '../../components/podcast-card'
+//  import moment from 'moment'
+
+  const $wxapp = wepy.$instance
+
+  export default class AppHome extends wepy.page {
+    def = {
+      init: false,
+      app: {},
+      status: null,
+      appTitle: '育儿柚道',
+      reduce: null,
+      share: null,
+      notices: null,
+      currentTab: 0,
+      swiper: {},
+      curplay: {
+        title: '',
+        authorInfo: {}
+      },
+      page: {
+        added: [],
+        list: []
+      }
+    }
+    data = {...this.def}
+
+    async onLoad ({sence}) {
+      await auth.login()
+      this.app = await Cache.app()
+      this.swiper = this.app.swiper
+      // 获取推广的节目内容
+      const sticky = await app.getSticky(this.app.stickys[0])
+      this.curplay = Object.assign({}, sticky, {play_status: 'stop'})
+      $wxapp.globalData.curplay = this.curplay
+      this.page = podcast.page()
+      await this.next()
+      this.loaded()
+      this.preload()
+      $wxapp.emitter.on('tab-change', async (active) => {
+        console.log('tab-change ve')
+        if (active === 1) {
+          this.$invoke('me', 'onShow')
+        } else {
+          await this.onShow()
+        }
+      })
+    }
+
+    async onShow () {
+      this.currentTab = 0
+    }
+
+    watch = {}
+
+    preload () {
+    }
+
+    onShareAppMessage () {
+      return {
+        title: '育儿柚道',
+        desc: '育儿柚道-育儿有道！',
+        path: '/pages/index'
+      }
+    }
+    methods = {
+      share () {
+        Tips.modal('当前版本过低，请更新微信或点击右上角进行分享')
+      }
+    }
+
+    components = {
+      'Loadmore': Loadmore,
+      'tab-bar': TabBar,
+      'ad-swiper': AdSwiper,
+      me: Me,
+      'podcast-card': PodcastCard
+    }
+    mixins = [base, pagination]
+    config = {
+      'navigationBarTitleText': '育儿柚道',
+      'navigationBarTextStyle': 'white',
+      'navigationBarBackgroundColor': '#3b3a40',
+      enablePullDownRefresh: true
+    }
+  }
+</script>
+
+<style lang="scss">
+  .gridicon {
+    fill: currentColor;
+
+    &.needs-offset g {
+      transform: translate(1px, 1px); /* translates to .5px because it's in a child element */
+    }
+
+    &.needs-offset-x g {
+      transform: translate(1px, 0); /* only nudges horizontally */
+    }
+
+    &.needs-offset-y g {
+      transform: translate(0, 1px); /* only nudges vertically */
+    }
+  }
+
+  .tab_item {
+    height: 100%;
+  }
+
+  page, .body {
+    height: 100%;
+    font-family: '\5FAE\8F6F\96C5\9ED1', arial;
+    /*background-color: #f0eff5;*/
+  }
+</style>

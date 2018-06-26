@@ -1,0 +1,301 @@
+<style lang="scss" scoped>
+  @import '../stylesheets/style';
+
+  $fontcolor: #5B5B5B;
+  $activecolor: #2196F3;
+  .tab {
+    color: $fontcolor;
+    width: rpx(710);
+    border-radius: rpx(20);
+    /*border-top-left-radius: rpx(12);*/
+    /*border-top-right-radius: rpx(12);*/
+    /*border-bottom-left-radius: rpx(100);*/
+    /*border-bottom-right-radius: rpx(100);*/
+    margin-left: rpx(20);
+    background: #FFFFFF;
+    /*z-index: 100;*/
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.10) inset, /*左边阴影*/
+    0 2px 4px rgba(0, 0, 0, 0.20); /*右边阴影*/
+    white-space: nowrap;
+    .tab_item {
+      /*border-left: 1px solid rgba(0, 0, 0, 0.05);*/
+      display: flex;
+      flex-flow: column;
+      /*display: inline-block;*/
+      width: 33.33333%;
+      text-align: center;
+      align-content: center;
+      align-items: center;
+      padding: rpx(6);
+      height: rpx(100);
+      .icon {
+        display: flex;
+        width: rpx(60);
+        height: rpx(60);
+      }
+      .icon-title {
+        font-size: rpx(24);
+      }
+      .icon-active {
+        color: #476DDC;
+      }
+    }
+
+    .toolbar {
+      /*width: calc(100% - 48rpx);*/
+      display: flex;
+    }
+    @-webkit-keyframes AnimationName {
+      0% {
+        background-position: 100% 0%;
+      }
+      100% {
+        background-position: 0% 0%;
+      }
+    }
+    .toolbar {
+      .song {
+        border-top-left-radius: rpx(30);
+        background: #EDF6FF;
+        /* placeholder: */
+        /*background-image: linear-gradient(90deg, #2C1BC5 0%, #53A0FD 18%, #FFFFFF 100%);*/
+        background: -webkit-linear-gradient(right, #edf6ff 0%, #edf6ff 50%, #fff 50%, #fff 100%);
+        /*background: linear-gradient(left, #ffa600 0%, #ffa600 50%, #fff 50%, #fff 100%);*/
+        background-size: 200% 200%;
+        /*-webkit-animation: AnimationName 10s ease infinite;*/
+        display: flex;
+        flex-flow: row;
+        width: 50%;
+        &.is-playing {
+          box-shadow: inset 3px 0 0 $blue-medium;
+          /*animation: loading-fade 1.6s ease-in-out infinite;*/
+        }
+        .album {
+          width: rpx(74);
+          height: rpx(74);
+          margin: rpx(12) rpx(12) rpx(12) rpx(20);
+          border-radius: rpx(10);
+        }
+        .info {
+          /*color: #418AF2;*/
+          flex: 1;
+          align-items: center;
+          justify-content: center;
+          font-size: rpx(24);
+          margin: rpx(20) rpx(20) rpx(20) rpx(8);
+          overflow: hidden;
+          word-break: break-all;
+          text-overflow: ellipsis; //文字隐藏后添加省略号
+          white-space: nowrap; //强制不换行
+
+          .author {
+            font-size: rpx(20);
+            line-height: rpx(32);
+            color: #aaa;
+          }
+        }
+      }
+
+    }
+    .arrow {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #fff;
+      height: rpx(100);
+      text-align: center;
+      width: rpx(52);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-top: 1px solid #f5f5f5;
+      box-sizing: border-box;
+      border-left: 1px solid #f5f5f5;
+      image {
+        width: rpx(24);
+        height: rpx(24);
+      }
+    }
+    .play {
+      display: flex;
+      width: rpx(200);
+      height: 100%;
+    }
+  }
+</style>
+<template>
+
+  <view class="tab">
+    <view class="toolbar" wx:if="{{showToolbar}}">
+      <view class="tab_item" wx:for="{{navs}}" wx:key="{{item.name}}" @tap="changeNav({{item.name}})">
+        <image class="icon" src="../images/icon/icon-{{item.name}}{{item.name === active ? '-active' : ''}}.svg"></image>
+        <text class="icon-title {{item.name === active ? 'icon-active' : ''}}">{{item.title}}</text>
+      </view>
+    </view>
+
+  </view>
+</template>
+<script>
+  /* eslint-disable no-undef,no-throw-literal,no-extra-bind,no-extra-parens,no-unused-vars,spaced-comment */
+
+  import wepy from 'wepy'
+
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+  const DEFAULT = {
+    /**
+     * 必填项
+     */
+    slideLength: 3,                       //  由于目前无法直接获取slide页数，目前只能通过参数写入
+    /**
+     * 可选参数
+     */
+    width: device.windowWidth,
+    height: device.windowHeight,
+    speed: 300,
+    timingFunction: 'ease',               //  过渡动画速度曲线
+    directionViewName: 'directionClass',   //  对应视图中direction类名
+    animationViewName: 'tabAnimationData',   //  对应视图中animation属性名
+    /**
+     * 事件回调
+     * @type {[type]}
+     */
+    onInit: null,                         //  swiper初始化时执行
+    onChange: null
+  }
+  let seek = 0
+
+  export default class Tab extends wepy.component {
+    props = {
+      active: {
+        twoWay: true,
+        type: String
+      },
+      curplay: {
+        twoWay: true,
+        type: Object
+      },
+      option: {
+        type: Object,
+        twoWay: true
+      }
+    }
+    data = {
+      navs: [
+        {
+          name: 'stickys',
+          title: '精选'
+        }, {
+          name: 'feed',
+          title: '柚道'
+        }, {
+          name: 'me',
+          title: '我的'
+        }
+      ],
+      width: device.windowWidth,
+      height: device.windowHeight,
+      showToolbar: true,
+      playing: true,
+      tabAnimationData: null,
+      animationViewName: 'tabAnimationData',
+      XORY: 'Y',
+      downloadPercent: 0,
+      percent: 0,
+      start: 100,
+      end: 0,
+      curNav: ''
+    }
+    watch = {
+//      curplay (newValue, oldValue) {
+//        console.log(newValue.id + 'new value id')
+//      }
+    }
+    methods = {
+      tap () {
+//        this.$redirect()
+//        wx.navigateTo({
+//          url: `/pages/detail/index?id=${_wxapp.globalData.curplay.id}&parent=${_wxapp.globalData.curplay.parent}`,
+//          success (res) {
+//          }
+//        })
+      },
+      updatePlayer (curplay) {
+        this.curplay = curplay
+        this.$apply()
+      },
+      showDetail (e) {
+      },
+      changeNav (navName) {
+//        console.log(navName)
+//        this.active = navName
+//        this.curNav.active = false
+//        this.curNav = navName
+//        this.$apply()
+//        console.log('lalaa -----' + JSON.stringify(this.curNav))
+//        this.$root.$parent.emitter.emit('test')
+//        this.active = navName
+        this.$root.$parent.emitter.emit('tab-change', navName)
+//        this.cur.active = true
+//        this.$apply()
+//        const iconUrl = '../images/icon/icon'
+//        const {onChange} = this
+//        typeof onChange === 'function' && onChange(this, e) //  当手指碰触到slide时执行
+//        this.active = +idx
+//        if (this.active === 1) {
+//          this.$invoke('./profile', 'onShow')
+//        }
+//        console.log(JSON.stringify(this.cur))
+//        this.$apply()
+      },
+      playingToggle () {
+        this.playing = !this.playing
+      }
+    }
+
+    /**
+     * 同步设置到视图
+     * @param DEFAULT：默认参数
+     * @param param：构造参数
+     */
+    syncView (viewName, prop) {
+      this[`${viewName}`] = prop
+      this.$apply()
+    }
+
+    initTab () {
+      const {onInit} = this
+      typeof onInit === 'function' && onInit(this)
+    }
+
+    onLoad () {
+//      for (let cur of this.navs) {
+//        if (cur.name === this.active) {
+//        }
+//      }
+//      const that = this
+//      this.curNav = this.navs[0]
+/*      $wxapp.emitter.on('playing', e => {
+        clearInterval(seek)
+        that.curplay = $wxapp.globalData.curplay
+        that.$apply()
+        $wxapp.playStatus(that)
+        seek = setInterval(() => {
+          $wxapp.playStatus(that)
+        }, 1000)
+      })
+      $wxapp.emitter.on('playing-stop', (e) => {
+        clearInterval(seek)
+      })
+      $wxapp.emitter.on('onload', (e) => {
+        that.curplay = $wxapp.globalData.curplay
+      })*/
+      const {option} = this
+      const CONFIG = Object.assign(this, DEFAULT, option)
+      this.initTab(CONFIG)
+//      $wxapp.emitter.on('tab-change', (active) => {
+//        that.active = active
+//        that.$apply()
+//      })
+    }
+  }
+</script>

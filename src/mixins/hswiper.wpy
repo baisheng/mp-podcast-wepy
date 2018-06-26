@@ -1,0 +1,19 @@
+<script>
+  import wepy from 'wepy'
+//  import Tips from '../utils/Tips'
+
+  /**
+   * 分页通用方法
+   */
+  export default class hswiper extends wepy.mixin {
+    config = {}
+    components = {}
+    methods = {}
+    events = {}
+    data = {
+      isPageLoading: false,
+      isPageEmpty: false,
+      isPageReachBottom: false
+    };
+  }
+</script>

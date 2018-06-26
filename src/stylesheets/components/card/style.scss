@@ -1,0 +1,109 @@
+$white: rgba(255, 255, 255, 1);
+$gray: #A1a1a1;
+// ==========================================================================
+// Breakpoint Mixin
+// See https://wpcalypso.wordpress.com/devdocs/docs/coding-guidelines/css.md#media-queries
+// ==========================================================================
+
+
+// Alerts
+$alert-yellow: #f0b849;
+$alert-red: #F26175;
+$alert-green: #4ab866;
+$alert-purple: #855DA6;
+// Primary Accent (Blues)
+$blue-wordpress: #3B4859;
+$blue-light: #EFF2F7;
+$blue-medium: #2196F3;
+$link-highlight: tint($blue-medium, 20%);
+@import "../../shared/mixins/mixins";
+
+.card {
+  display: block;
+  position: relative;
+  margin: 0 auto 30rpx auto;
+  padding: 16px;
+  box-sizing: border-box;
+  background: $white;
+  box-shadow: 0 0 0 1px transparentize(lighten($gray, 20%), .5),
+  0 1px 2px lighten($gray, 30%);
+  .animate-box {
+    opacity: 0;
+  }
+  .fadeInUp {
+    -webkit-animation-name: fadeInUp;
+    animation-name: fadeInUp;
+  }
+  .animated-fast {
+    -webkit-animation-duration: .5s;
+    animation-duration: .5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+  }
+  @include clear-fix;
+
+  // Compact Card
+  &.is-compact {
+    margin-bottom: 1px;
+    padding: 16px 24px;
+  }
+
+  &.is-card-link {
+    padding-right: 48px;
+  }
+
+  &.is-error {
+    box-shadow: inset 3px 0 0 $alert-red;
+  }
+
+  &.is-info {
+    box-shadow: inset 3px 0 0 $blue-wordpress;
+  }
+
+  &.is-success {
+    box-shadow: inset 3px 0 0 $alert-green;
+  }
+
+  &.is-warning {
+    box-shadow: inset 3px 0 0 $alert-yellow;
+  }
+}
+
+// Clickable Card
+.card__link-indicator {
+  color: lighten($gray, 20%);
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 16px;
+}
+
+a.card:hover {
+  .card__link-indicator {
+    color: lighten($gray, 10%);
+  }
+}
+
+a.card:focus {
+  outline: 0;
+
+  .card__link-indicator {
+    color: $link-highlight;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    visibility: hidden;
+    -webkit-transform: translate3d(0, 40px, 0);
+    transform: translate3d(0, 40px, 0);
+  }
+  100% {
+    visibility: visible;
+    opacity: 1;
+    -webkit-transform: none;
+    transform: none;
+  }
+}

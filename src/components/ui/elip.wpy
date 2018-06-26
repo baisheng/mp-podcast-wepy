@@ -1,0 +1,34 @@
+<template>
+  <view class="p-elip {{line > 1 ? 'elip--multiple' : ''}}"
+        style="{{line > 1 ? '-webkit-line-clamp:' + line + ' ;' : ''}}">
+    <slot></slot>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class elip extends wepy.component {
+    props = {
+      line: {
+        type: Number,
+        default: 1
+      },
+      page: {}
+    };
+  }
+</script>
+
+<style>
+  .p-elip {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .elip--multiple {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+</style>

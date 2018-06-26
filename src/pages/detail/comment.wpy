@@ -1,0 +1,252 @@
+<template>
+  <view class="score-item-box">
+    <view class="score-note">
+      <textarea @input="input"  auto-height placeholder="请输入您的想法" />
+    </view>
+  </view>
+
+  <view class="zan-panel">
+    <view class="zan-btns">
+      <button class="zan-btn zan-btn--plain" @tap="confirm">提交评论</button>
+    </view>
+  </view>
+
+</template>
+<script>
+  /* eslint-disable no-unused-vars */
+
+  import wepy from 'wepy'
+  import base from '../../mixins/base'
+  import Tips from '../../utils/Tips'
+  import Route from '../../utils/WxUtils'
+  import Event from '../../utils/Event'
+//  import comment from '../../api/comment';
+  import podcastApi from '../../api/podcast'
+
+  export default class Comment extends wepy.page {
+    def = {
+      init: false,
+      postId: '',
+      content: ''
+    };
+    data = {...this.def}
+    onLoad ({postId}, {preload}) {
+      console.log(postId)
+//      this.scores = preload.data
+      this.postId = postId
+      this.loaded()
+    };
+    methods = {
+      star(goods, index) {
+        console.info(goods, index)
+        const {goodsId, sku} = goods
+        const score = this.scores.find(item => item.goodsId === goodsId && item.sku === sku)
+        for (let i = 0; i < 5; i++) {
+          score.starArr[i] = i <= index ? 1 : 0
+        }
+        score.star = index + 1
+      },
+      input(event) {
+//        const index = event.currentTarget.datasetindex
+        this.content = event.detail.value
+      },
+      async confirm() {
+//        const data = this.scores.map(item => {
+//          return {
+//            comment: item.comment,
+//            sku: item.sku,
+//            star: item.star,
+//            goodsId: item.goodsId,
+//            orderId: this.orderId
+//          }
+//        })
+        await Tips.confirm('确认评论？')
+//        await comment.add(data)
+        await podcastApi.repliesNew(this.postId, this.content)
+        await Tips.success('提交成功')
+//        Event.emit(Event.ORDER_LIST_UPDATE)
+//        this.$root.$navigate(`/pages/detail/index?id=${}&parent=${item.id}`)
+        Route.backOrRedirect(`/pages/detail/index?id=${this.postId}&parent=${this.postId}`)
+      }
+    };
+    components = {};
+    mixins = [base];
+    config = {
+      navigationBarTitleText: '课程评论'
+    };
+  }
+</script>
+
+<style lang="scss">
+  //******字体颜色变量******/
+  $color-major: #FF6200;
+  $color-primary: #1296DB;
+  $color-primary-darken: darken($color-primary, 5%);
+  $color-muted: #A3A3A3;
+  $color-weak: #626E7A;
+  $color-normal: #262626;
+  $color-danger: #e33;
+  $color-warn: #f85;
+
+  //******字体大小变量******/
+  $text-xxl: 34rpx;
+  $text-xl: 32rpx;
+  $text-nm: 28rpx;
+  $text-lg: 30rpx;
+  $text-sm: 26rpx;
+  $text-xs: 24rpx;
+  $text-xxs: 22rpx;
+  $text-form: 17px;
+
+
+  //******边框样式******/
+  $color-border: #EDEDED;
+  $border: 1px solid $color-border;
+  $border-dot: 1px dotted #EFF0F2;
+
+  //******背景样式******/
+  $color-bg-body: #F5F5F5;
+  $color-bg-item: #FAFAFA;
+  .zan-btn {
+    color: #333;
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    font-size: 16px;
+    line-height: 45px;
+    height: 45px;
+    box-sizing: border-box;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .zan-btn::after {
+    display: none;
+  }
+
+  .zan-btn--primary {
+    color: $color-primary;
+    background-color: #fff;
+    border-color: $color-primary;
+  }
+
+  .zan-btn--warn {
+    color: #fff;
+    background-color: $color-warn;
+    border-color: $color-warn;
+  }
+
+  .zan-btn--danger {
+    color: $color-danger;
+    background-color: #fff;
+    border-color: $color-danger;
+  }
+
+  .zan-btn--fill {
+    background-color: #3B7CFF;
+    color:#FFF;
+  }
+  .zan-btn--plain.zan-btn--fill {
+    background-color: #3B7CFF;
+    color:#FFF;
+  }
+
+  .zan-btn--small {
+    display: inline-block;
+    height: 30px;
+    line-height: 29px;
+    font-size: 13px;
+    margin-left: 0px;
+    margin-right: 5px;
+    margin-bottom: 0;
+  }
+  .zan-btn--mini {
+    display: inline-block;
+    line-height: 21px;
+    height: 22px;
+    font-size: 10px;
+    margin-right: 5px;
+    margin-left: 0px;
+    margin-bottom: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .zan-btn--large {
+    border-radius: 0;
+    margin-bottom: 0;
+    border: none;
+    line-height: 50px;
+    height: 50px;
+  }
+
+  .zan-btns {
+    margin: 15px;
+  }
+
+  .zan-btn.zan-btn--disabled {
+    /* 防止样式被 button[disabled] 的规则覆盖，所以使用了important */
+    color: #999 ! important;
+    background: #f8f8f8 ! important;
+    border-color: #e5e5e5 ! important;
+    cursor: not-allowed ! important;
+    opacity: 1 ! important;
+  }
+
+  .zan-panel {
+    background: #fff;
+    border-top: 1rpx solid #e5e5e5;
+    border-bottom: 1rpx solid #e5e5e5;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .score-item-box{
+    margin-top: 10rpx;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .socre-header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 20rpx 30rpx;
+    border-top: 1px solid #EDEDED;
+    border-bottom: 1px solid #EDEDED;
+  }
+
+  .socre-header .title{
+    font-size: 28rpx;
+    margin-left: 30rpx;
+  }
+  .score-note{
+    border-bottom:  1px solid #EDEDED;
+  }
+
+  .goods-img{
+    height: 60rpx;
+    width: 60rpx;
+    vertical-align: middle;
+  }
+
+  .star-box image{
+    height: 50rpx;
+    width: 50rpx;
+    vertical-align: middle;
+    margin-left: 30rpx;
+  }
+
+  textarea{
+    padding: 10rpx;
+    width: 90%;
+    min-height: 80px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: MicroSoft Yahei;
+    font-size: 30rpx;
+    color: #666;
+  }
+</style>

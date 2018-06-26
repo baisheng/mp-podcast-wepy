@@ -1,0 +1,37 @@
+<style lang="scss" scoped>
+  .swiper {
+    width: 100%;
+    height: rpx(440) !important;
+    .slide-image {
+      width: 100%;
+      height: rpx(440) !important;
+    }
+  }
+</style>
+<template>
+  <swiper
+    class="swiper"
+    indicator-dots="{{config.indicatorDots}}"
+    autoplay="{{config.autoplay}}" interval="{{config.interval}}" duration="{{config.duration}}">
+    <block wx:for="{{config.items}}" wx:key="item">
+      <swiper-item>
+        <!--<image src="{{item.image_link}}" class="slide-image"/>-->
+        <image src="{{item.image_link}}" class="slide-image"/>
+        <!--<image src="../images/swiper.png" class="slide-image"/>-->
+      </swiper-item>
+    </block>
+  </swiper>
+</template>
+<script>
+  import wepy from 'wepy'
+//  import {api} from '../config'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class AdSwiper extends wepy.component {
+    mixins = [base, http]
+    props = {
+      config: {}
+    }
+  }
+</script>

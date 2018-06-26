@@ -1,0 +1,252 @@
+<template>
+  <view>
+    <view class="podcast-card foldable-card is-expanded">
+      <view class="podcast-card__header is-clickable has-border">
+
+        <view class="foldable-card__main">
+          <view class="podcast__header">
+            <view class="podcast-icon animate__appear">
+              <image class="podcast-icon__img" mode="aspectFill" src="{{item.author.avatar}}"
+                     @tap="showAuthor({{item.author.login}})"></image>
+            </view>
+            <view class="podcasts-browser-item__info" @tap="headerTapAction({{item}})">
+              <view class="podcasts-browser-item__title">
+                {{ item.title }}
+              </view>
+              <view class="podcasts-browser-item__author">
+                @ {{ item.author.nicename }} - {{ item.modified }}
+              </view>
+            </view>
+          </view>
+
+        </view>
+        <view class="foldable-card__secondary">
+          <view class="foldable-card__summary">
+            <slot name="summary"></slot>
+          </view>
+          <view class="foldable-card__summary-expanded">
+            <!--<navigator url="/pages/detail/index?id={{ item.id }}&parent={{ item.id }}">-->
+            <!--<image class="more" src="../images/more.svg"></image>-->
+            <!--</navigator>-->
+          </view>
+        </view>
+
+        <!--<button class="foldable-card__action foldable-card__expand"></button>-->
+      </view>
+      <view class="podcast-card__content" wx:if="{{isExpanded}}" @tap="fold({{item}})">
+        <view class="is-fold" wx:if="{{item.content}}" @tap="headerTapAction({{item}})">
+          <text>{{ item.content}}</text>
+          <!--<view class="more">-->
+          <!--<text class="icon-ios-arrow-{{item.contentFold ? 'down' : 'up'}}"></text>-->
+          <!--</view>-->
+        </view>
+        <view class=" plugin-meta__banner {{ item._.header_collapsed ? '': 'is-collapsed'}}"
+              wx:if="{{item.featured_image}}">
+          <image class="plugin-meta__banner-image post-image__image"
+                 mode="{{item._.header_collapsed ? 'aspectFit': 'aspectFill'}}" src="{{item.featured_image}}"
+                 @tap="tapImage({{item.featured_image}})"></image>
+        </view>
+      </view>
+      <view class="podcast {{item.list ? '': 'is-placeholder'}}">
+        <scroll-view scroll-x="true" class="episode" scroll-into-view="{{toView}}" scroll-with-animation="true">
+          <!--{{(curplay.id === item.id && curplay.play_status === 'playing') ? 'is-playing' : ''}}"-->
+          <view class="content">
+            <view
+              class="episode-audio_card is-compact"
+              wx:for-items="{{item.list}}" wx:for-index="index" wx:for-item="audio" wx:key="id" id="audio_{{audio.id}}">
+              <!-- 有播放状态的专辑 -->
+              <image class="gridicon player" src="../images/icon/icon-music-pause-mini.svg"
+                     @tap="playItem({{index}},{{audio}})"
+                     wx:if="{{(curAudio.id === audio.id && curAudio.playStatus === 'playing')}}"></image>
+              <image class="gridicon player" src="../images/icon/icon-music-play-mini.svg"
+                     @tap="playItem({{index}},{{audio}})"
+                     wx:if="{{(curAudio.id === audio.id && (curAudio.playStatus === 'stop' || curAudio.playStatus === 'pause'))}}"></image>
+              <!-- 没有状态的专辑 -->
+              <image class="gridicon player" src="../images/icon/icon-music-play-mini.svg"
+                     @tap="playItem({{index}},{{audio}})"
+                     wx:if="{{(curAudio.id !== audio.id)}}"></image>
+
+              <view class="episode-audio_card__info">
+                <view class="episode-audio_card__title">{{index}} - {{audio.title}}</view>
+              </view>
+            </view>
+          </view>
+          <view class="empty"></view>
+        </scroll-view>
+      </view>
+
+      <view class="podcast-actions">
+        <view class="post-actions__share">
+          <view class="podcast-actions__item" @tap="ilikeToggle({{item}})">
+            <image class="icon" src="../images/icon/icon-like{{item.i_like ? '-active': ''}}.svg"></image>
+            <text>{{item.like_count}}</text>
+          </view>
+          <view class="podcast-actions__item" @tap="headerTapAction({{item}})">
+            <image class="icon" src="../images/icon/icon-comment.svg"></image>
+            <text>{{item.replies_count}}</text>
+          </view>
+        </view>
+        <view class="podcast-actions__item">
+          <button class="pain-btn" plain open-type="share" wx:if="{{share}}">
+            <image class="icon" src="../images/icon/icon-share.svg"></image>
+          </button>
+          <image class="icon" src="../images/icon/icon-share.svg" @tap="share" wx:else></image>
+        </view>
+      </view>
+    </view>
+
+  </view>
+
+</template>
+<script>
+  /* eslint-disable no-undef,no-unused-vars,spaced-comment */
+
+  import wepy from 'wepy'
+  import base from '../mixins/_base'
+  import audioManager from '../mixins/audioManager'
+  import postApi from '../api/podcast'
+  import WxUtils from '../utils/WxUtils'
+
+  const $wxapp = wepy.$instance
+
+  export default class PodcastCard extends wepy.component {
+    mixins = [base, audioManager]
+
+    props = {
+      id: String,
+      item: {
+        type: Object,
+        twoway: true
+      },
+      isExpanded: {
+        type: Boolean,
+        default: true
+      }
+    }
+    data = {
+      id: '',
+      imageList: [],
+      playing: false,
+      scrollLeft: 0,
+      isFold: true,
+      curItem: {},
+      toView: '',
+      curplay: {
+        id: ''
+      },
+      share: null
+    }
+    components = {}
+    methods = {
+      fold (item) {
+        this.isFold = !this.isFold
+        item.contentFold = this.isFold
+      },
+      async ilikeToggle (item) {
+        if (!item.i_like) {
+          const data = await postApi.newLike(item.id)
+          item.i_like = true
+          item.like_count = data.like_count
+        } else {
+          const data = await postApi.unLike(item.id)
+          item.i_like = false
+          item.like_count = data.like_count
+        }
+        this.$apply()
+        // 如果 未处理会卡住
+        this.loaded()
+        this.$root.$parent.emitter.emit('liked', item)
+      },
+      // 索引 + 音频
+      playItem (index, audio) {
+        console.log(this.curAudio.id + '----' + audio.id)
+        if (this.curAudio.id === audio.id) {
+          this.play()
+        } else {
+          const curAudio = {
+            id: audio.id,
+            albumId: this.item.id,
+            epname: this.item.title,
+            title: audio.title,
+            singer: audio.author.nicename,
+            avatar: audio.author.avatar,
+            coverImgUrl: this.item.featured_image,
+            src: audio.url,
+            playStatus: 'playing'
+          }
+          if ($wxapp.audioStore.getAlbum() !== this.item) {
+            $wxapp.audioStore.setAlbum(this.item)
+            $wxapp.emitter.emit('change-album')
+          }
+          $wxapp.audioStore.setAudio(curAudio)
+          $wxapp.audioStore.setCurIndex(index)
+          $wxapp.emitter.emit('change-audio')
+          this.playTarget()
+        }
+      },
+      handleTap () {
+        this.item._.header_collapsed = !this.item._.header_collapsed
+      },
+      tapImage (image) {
+//        const current = e.target.src
+        this.imageList.push(image)
+        wx.previewImage({
+          current: image,
+          urls: this.imageList,
+          fail () {
+          },
+          complete () {
+          }
+        })
+      },
+      showAuthor (userId) {
+        this.$root.$navigate(`/pages/author/index?id=${userId}`)
+      },
+      headerTapAction (item, $event) {
+        this.$root.$navigate(`/pages/detail/index?id=${item.id}&parent=${item.id}`)
+//        wx.navigateTo({
+//          url: `/pages/detail/index?id=${item.id}&parent=${item.id}`,
+//          success (res) {
+//          }
+//        })
+//        this.$emit('header-tap', $event)
+      }
+    }
+
+    async onComponentLoad (value) {
+//      this.curplay = $wxapp.globalData.curplay
+    }
+
+    async onShow (value) {
+//      this.curplay = $wxapp.globalData.curplay
+//      this.$apply()
+    }
+
+    onLoad () {
+      $wxapp.emitter.on('audio-play-next', () => {
+        this.curplay = $wxapp.audioStore.getAudio()
+        this.toView = 'audio_' + this.curplay.id
+        this.scrollLeft = 30
+        this.$apply()
+      })
+      this.share = WxUtils.canIUse('button.open-type.share')
+      $wxapp.emitter.on('audio_toggle', ({playing, curplay}) => {
+        this.playing = playing
+//        clearInterval(seek)
+//        $wxapp.playStatus(that)
+//        seek = setInterval(() => {
+//          $wxapp.playStatus(that)
+//        }, 1000)
+        this.curplay = curplay
+        this.$apply()
+      })
+    }
+
+    async onReload () {
+      this.page = 1
+    }
+  }
+</script>
+<style lang="scss" scoped>
+
+</style>

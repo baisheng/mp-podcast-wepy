@@ -1,0 +1,290 @@
+<style type="scss">
+  $fontcolor: #7b7b7b;
+  $activecolor: #2196F3;
+  .tab {
+    color: $fontcolor;
+    position:fixed;
+    bottom: 0;
+    height: 100rpx;
+    width: 100%;
+    left: 0;
+    right: 0;
+    /*width: calc(100% - 50rpx);*/
+    /*border-top: 1px solid #dad9d6;*/
+    background-color: #fff;
+    font-size: 24rpx;
+    border-top: 1px solid #f5f5f5;
+    box-sizing: border-box;
+    white-space:nowrap;
+    .tab_item {
+      &.active {
+        color: $activecolor;
+      }
+      display: inline-block;
+      width: 25%;
+      text-align: center;
+    }
+    .icon {
+      width: 98rpx;
+      height: 98rpx;
+      display: block;
+      margin: auto;
+    }
+    .toolbar, .player {
+      width: calc(100% - 48rpx);
+      display: flex;
+    }
+    .title {}
+    .arrow{
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #fff;
+      height: 100rpx;
+      text-align: center;
+      width: 52rpx;
+      display: flex;
+      justify-content:center;
+      align-items: center;
+      border-top: 1px solid #f5f5f5;
+        box-sizing: border-box;
+      border-left: 1px solid #f5f5f5;
+    image{
+      width: 24rpx;
+      height: 24rpx;
+    }
+    }
+    .play{
+        display:flex;
+          width: 200rpx;
+          height: 100%;
+   }
+    .album{
+      width: 80rpx;
+      height: 80rpx;
+      margin: 10rpx;
+      border-radius: 10rpx;
+    }
+    /*.album image{*/
+      /*width: 100rpx;*/
+      /*height: 100rpx;*/
+    /*}*/
+    .play-info {
+      flex: 1;
+        display: inline-block;
+      align-items:center;
+      justify-content: center;
+      font-size: 28rpx;
+      margin:20rpx;
+        .author {
+          font-size: 24rpx;
+          line-height: 30rpx;
+          color: #aaa;
+        }
+  }
+  .pa-baction,.pa-maction,.pa-saction,.next-action{
+      display: flex;
+      align-items:center;
+      justify-content: center;
+        margin: 0;
+      padding:0;
+        width: 50%;
+  }
+  .next-action image{ width: 100rpx; height: 100rpx;  vertical-align: middle;margin-right: 10rpx;}
+  .pa-baction image{width:100rpx;height:100rpx; vertical-align: middle; }
+  .pa-maction image{width:80rpx;height:80rpx;vertical-align: middle;margin-top: 15rpx}
+  .pa-saction image{width:120rpx;height:120rpx; vertical-align: middle;}
+  .more-icon{
+    }
+
+    .music-icon{
+    }
+  }
+</style>
+<template>
+  <view class="tab">
+    <view class="player" wx:if="{{!showToolbar}}" animation="{{tabAnimationData}}">
+      <!--<view class="album">-->
+        <image class="album" src="../images/myheader.png" background-size="cover"></image>
+      <!--</view>-->
+      <view class="play-info">
+      <view class="title"><text>好妈妈胜过好老师</text></view>
+      <view class="author"><text>建莉</text></view>
+      <view class="timeline"></view>
+      </view>
+      <view class="play">
+        <view class="pa-baction" wx:if="{{!playing}}" bindtap="playingToggle" data-p="{{playing}}">
+          <image id='pa-playing' src="../images/play.png" />
+        </view>
+        <view class="pa-baction" wx:if="{{playing}}" bindtap="playingToggle" data-p="{{playing}}">
+          <image id='pa-playing' src="../images/pause.png" />
+        </view>
+        <view class="next-action">
+          <image src="../images/next.png"></image>
+        </view>
+      </view>
+    </view>
+    <view class="toolbar" wx:if="{{showToolbar}}"  animation="{{tabAnimationData}}">
+      <view class="arrow" @tap="toggle">
+        <image class="more-icon" src="../images/more.png" wx:if="{{!showToolbar}}"></image>
+        <image class="music-icon" src="../images/music.png"  wx:if="{{(showToolbar) && (!playing)}}">></image>
+        <image class="music-icon" src="../images/music-active.png" wx:if="{{showToolbar && playing}}"></image>
+      </view>
+
+      <view class="tab_item tab_message{{active === 0 ? ' active' : ''}}" @tap="change(0)">
+        <image class="icon" src="../images/toolbar/discover{{active === 0 ? '_active' : ''}}.png"></image>
+      </view>
+      <view class="tab_item tab_message{{active === 3 ? ' active' : ''}}" @tap="change(3)">
+        <image class="icon" src="../images/toolbar/me{{active === 3 ? '_active' : ''}}.png"></image>
+        <!--<text class="title">我</text>-->
+      </view>
+    </view>
+
+  </view>
+</template>
+<script>
+  /* eslint-disable no-undef,no-throw-literal,no-extra-bind,no-extra-parens */
+
+  import wepy from 'wepy'
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+  const DEFAULT = {
+    /**
+     * 必填项
+     */
+    slideLength: 3,                       //  由于目前无法直接获取slide页数，目前只能通过参数写入
+    /**
+     * 可选参数
+     */
+    width: device.windowWidth,
+    height: device.windowHeight,
+    speed: 300,
+    timingFunction: 'ease',               //  过渡动画速度曲线
+    directionViewName: 'directionClass',   //  对应视图中direction类名
+    animationViewName: 'tabAnimationData',   //  对应视图中animation属性名
+    /**
+     * 事件回调
+     * @type {[type]}
+     */
+    onInit: null,                         //  swiper初始化时执行
+    onChange: null
+  }
+
+  export default class Tab extends wepy.component {
+    props = {
+      active: {
+        twoWay: true
+      },
+      option: Object
+    }
+    data = {
+      width: device.windowWidth,
+      height: device.windowHeight,
+      showToolbar: true,
+      playing: true,
+      tabAnimationData: null,
+      animationViewName: 'tabAnimationData',
+      XORY: 'Y'
+    }
+    watch = {
+      animationData (newValue, oldValue) {
+//        console.log(`animationData value: ${oldValue} -> ${newValue}`)
+      }
+    }
+    methods = {
+      change (idx, e) {
+        const {onChange} = this
+        typeof onChange === 'function' && onChange(this, e) //  当手指碰触到slide时执行
+        this.active = +idx
+      },
+      playingToggle () {
+        this.playing = !this.playing
+      },
+      toggle () {
+        if (this.showToolbar) {
+          this.slideAnimation(100)
+//          this.slideAnimation(-this.width, 500)
+          setTimeout((function callback() {
+            this.slideAnimation()
+            this.showToolbar = !this.showToolbar
+            this.$apply()
+          }).bind(this), 300)
+        } else {
+          this.slideAnimation(100)
+//          this.slideAnimation(this.width, 500)
+          setTimeout((function callback() {
+            this.slideAnimation()
+            this.showToolbar = !this.showToolbar
+            this.$apply()
+          }).bind(this), 300)
+        }
+      }
+    }
+    slideAnimation(translate = 0, speed = 300, timingFunction = 'ease') {
+      const REG = {
+        TRANSLATE: /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/,
+        SPEED: /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/,
+        TIMINGFUNCTION: /linear|ease|ease-in|ease-in-out|ease-out|step-start|step-end/
+      }
+
+      const {XORY, animationViewName, consoleException} = this
+      try {
+        /**
+         * 异常处理
+         */
+        if (!REG.TRANSLATE.test(translate)) throw 'paramType'
+        if (!REG.SPEED.test(speed)) throw 'paramType'
+        if (!REG.TIMINGFUNCTION.test(timingFunction)) throw 'paramType'
+        /**
+         * 创建一个动画实例
+         */
+        const animation = wx.createAnimation({
+          transformOrigin: '50% 50% 0',
+          duration: speed,
+          timingFunction,
+          delay: 0
+        })
+        animation[`translate${XORY}`](translate).step()  //  动画描述
+        this.syncView(animationViewName, animation)  //  同步动画到视图
+      } catch (err) {
+        consoleException(err, 'slideAnimation[Function]')
+      }
+    }
+
+    /**
+     * 同步设置到视图
+     * @param DEFAULT：默认参数
+     * @param param：构造参数
+     */
+    syncView(viewName, prop) {
+      this[`${viewName}`] = prop
+//      console.log(viewName)
+      this.$apply()
+    }
+    /**
+     * 错误对照
+     */
+    consoleException(type, place) {
+      const ERROR = {
+        'paramType': '参数类型错误',
+        'bound': '参数越界'
+      }
+      console.log(`%c${place}:${ERROR[type]}`, 'color: red')
+    }
+
+    initTab () {
+      const {onInit} = this
+      typeof onInit === 'function' && onInit(this)
+    }
+    onShow() {
+
+    }
+    onLoad() {
+      console.log(this.option)
+//      console.log(this.active)
+      const {option} = this
+      const CONFIG = Object.assign(this, DEFAULT, option)
+      console.log(CONFIG)
+      this.initTab(CONFIG)
+    }
+  }
+</script>

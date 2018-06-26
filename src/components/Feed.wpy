@@ -1,0 +1,140 @@
+<template>
+  <view style="height: {{selfHeight}}">
+
+    <scroll-view
+      scroll-y style="height: {{selfHeight - 20}}px;"
+      @scrolltoupper="scrollToTop"
+      @scrolltolower="scrollToBottom"
+      @scroll="scroll" upper-threshold="0"
+      lower-threshold="0"
+      @touchstart="touchStart"
+      @touchend="touchEnd">
+      <view wx:if="{{isRefresh}}" class="refresh_root">
+        <view>
+          <text>正在刷新...</text>
+        </view>
+      </view>
+      <!--<view wx:if="{{currentTab === 'listen'}}">-->
+      <ad-swiper :config.sync="swiper"></ad-swiper>
+      <view class="tab_item">
+        <repeat for="{{page.list}}" key="index" index="index" item="item">
+          <podcast-card :item.sync="item" :id="item.id"></podcast-card>
+        </repeat>
+        <!-- 加载提示 -->
+        <Loadmore :page.sync="page"></Loadmore>
+        <view style="height: 100rpx;"></view>
+      </view>
+      <!--</view>-->
+    </scroll-view>
+  </view>
+</template>
+<script>
+  /* eslint-disable no-trailing-spaces,no-unused-vars,no-undef */
+
+  import wepy from 'wepy'
+  import Loadmore from '../components/ui/loadmore'
+  import AdSwiper from '../components/AdSwiper'
+  import PodcastCard from '../components/podcast-card'
+  import base from '../mixins/_base'
+  import pagination from '../mixins/pagination'
+  import Cache from '../utils/Cache'
+//  import app from '../api/app'
+  import podcast from '../api/podcast'
+
+  import Tips from '../utils/Tips'
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+
+  export default class List extends wepy.component {
+    mixins = [base, pagination]
+
+    components = {
+      'Loadmore': Loadmore,
+      'ad-swiper': AdSwiper,
+      'podcast-card': PodcastCard
+    }
+    props = {
+      list: {}
+    }
+    data = {
+      selfHeight: device.windowHeight,
+      swiper: {},
+      page: {
+        added: [],
+        list: []
+      },
+      list: [
+        {
+          id: '0',
+          title: 'loading'
+        }
+      ]
+    }
+
+    methods = {
+      scrollToTop () {
+        this.scrollStatus = 'top'
+//        this.reload()
+        console.log('top')
+      },
+      async scrollToBottom () {
+        this.scrollStatus = 'bottom'
+        console.log('bottom')
+        await this.next()
+      },
+      scroll () {
+        this.scrollStatus = 'scrolling'
+        console.log('scrolling...')
+      },
+      async touchStart (e) {
+        const touchPoint = e.touches[0]
+        const clientY = touchPoint.clientY
+        this.clientY = clientY
+//        if (this.clientY > 50) {
+//          this.isRefresh = true
+//        }
+      },
+      async touchEnd (e) {
+        const upPoint = e.changedTouches[0]
+        const endY = upPoint.clientY
+        const pointTopintY = Math.abs(endY - this.clientY)
+        const status = this.scrollStatus
+        // 上拉刷新
+        if (status === 'top' && pointTopintY > 50) {
+//          this.isRefresh = true
+          this.reload()
+        }
+        // 上拉加载
+        if (status === 'bottom' && pointTopintY > 50) {
+          this.isLoadMore = true
+          await this.next()
+        }
+        // 两秒后隐藏加载条
+        setTimeout(() => {
+          this.isRefresh = false
+          this.isLoadMore = false
+        }, 3000)
+      }
+    }
+
+    async onLoad () {
+      this.$root.$parent.emitter.on('liked', (item) => {
+        for (let i of this.page.list) {
+          if (i.id === item.id) {
+            i.i_like = item.i_like
+            i.like_count = item.like_count
+          }
+        }
+        this.$apply()
+//        Tips.success(item.i_like ? '已收藏' : '已取消')
+      })
+    }
+    async onShow () {
+      this.app = await Cache.app()
+      this.swiper = this.app.options.swiper
+
+      this.page = podcast.page('youdao')
+      await this.next()
+      this.loaded()
+    }
+  }
+</script>

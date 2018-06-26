@@ -1,0 +1,219 @@
+<template>
+  <view style="height: {{selfHeight}}">
+
+<!--    <scroll-view
+      scroll-y style="height: {{selfHeight - 20}}px;"
+      @scrolltoupper="scrollToTop"
+      @scrolltolower="scrollToBottom"
+      @scroll="scroll" upper-threshold="0"
+      lower-threshold="0"
+      @touchstart="touchStart"
+      @touchend="touchEnd">-->
+    <scroll-view
+      scroll-y style="height: {{selfHeight - 20}}px;"
+      @scrolltoupper="scrollToTop"
+      @scrolltolower="scrollToBottom"
+      @scroll="scroll" upper-threshold="0"
+      lower-threshold="0">
+      <view wx:if="{{isRefresh}}" class="refresh_root">
+        <view>
+          <text>正在刷新...</text>
+        </view>
+      </view>
+      <ad-swiper :config.sync="swiper"></ad-swiper>
+
+      <view class="o-page">
+
+        <!--
+    <view class="o-page__header">
+      <view class="o-page__header-title">
+        浏览
+      </view>
+    </view>
+    -->
+    <!-- Section 精选 -->
+        <!--
+    <view class="c-section">
+      <swiper class="c-stickys">
+        <block wx:for-items="{{stickys.list}}" wx:for-index="index" wx:for-item="item" wx:key="id">
+
+          <swiper-item class="c-stickys-item" @tap="tap({{item}})">
+            <view class="c-stickys-item__content">
+              <view class="c-stickys-item__tag">精选</view>
+              <view class="c-stickys-item__title">
+                <elip>
+                  {{item.title}}
+                </elip>
+              </view>
+              <view class="c-stickys-item__author">{{item.author.nicename}}</view>
+              <image class="c-stickys-item__cover" src="{{item.featured_image}}" mode="aspectFill"></image>
+            </view>
+          </swiper-item>
+        </block>
+      </swiper>
+    </view>
+    -->
+    <!-- end 精选 -->
+    <view wx:for-items="{{categories}}" wx:for-index="index" wx:for-item="item" wx:key="id" id="cate_{{item.term_id}}">
+      <view class="c-line"></view>
+      <view class="c-category__section">
+
+        <view class="c-category__header">
+          <view class="c-category__header-title">
+            {{item.name}}
+          </view>
+          <!--<view class="c-category__header-action">-->
+            <!--查看全部-->
+          <!--</view>-->
+        </view>
+
+        <scroll-view scroll-x="true" scroll-into-view="{{toView}}" scroll-with-animation="true" class="c-category__section-content">
+          <view class="c-podcast"
+                wx:for-items="{{item.podcastList}}"
+                wx:for-index="index"
+                wx:for-item="podcast"
+                wx:key="id"
+                @tap="tap({{podcast}})">
+            <image class="c-podcast__cover" mode="aspectFill" src="{{!podcast.featured_image ? placeholder : podcast.featured_image}}"></image>
+            <view class="c-podcast__title">
+              <elip>{{podcast.title}}</elip>
+            </view>
+            <view class="c-podcast__autor">{{podcast.author.nicename}}</view>
+          </view>
+
+        </scroll-view>
+      </view>
+
+    </view>
+
+    <!--<recommend wx:if="{{currentTab === 'stickys'}}"/>-->
+    <!--<feed wx:if="{{currentTab === 'feed'}}"></feed>-->
+    <!--<me class="tab_item" wx:if="{{currentTab === 'me'}}"></me>-->
+    <!--<youda class="tab_item" wx:if="{{currentTab === 'qa'}}"></youda>-->
+    <view style="height: 160rpx;"></view>
+
+  </view>
+    </scroll-view>
+  </view>
+</template>
+<script>
+  /* eslint-disable no-trailing-spaces,no-unused-vars,no-undef */
+
+  import wepy from 'wepy'
+  import Loadmore from '../components/ui/loadmore'
+  import AdSwiper from '../components/AdSwiper'
+  import base from '../mixins/_base'
+  import pagination from '../mixins/pagination'
+  import Cache from '../utils/Cache'
+//  import app from '../api/app'
+  import podcast from '../api/podcast'
+  import category from '../api/category'
+  import Elip from '../components/ui/elip'
+
+  import Tips from '../utils/Tips'
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+
+  export default class List extends wepy.component {
+    mixins = [base, pagination]
+
+    components = {
+      'ad-swiper': AdSwiper,
+      'Loadmore': Loadmore,
+      'elip': Elip
+    }
+    props = {
+      list: {}
+    }
+    data = {
+      selfHeight: device.windowHeight,
+      swiper: {},
+      page: {
+        added: [],
+        list: []
+      },
+      list: [
+        {
+          id: '0',
+          title: 'loading'
+        }
+      ],
+      placeholder: '../images/placeholder.jpg',
+      categories: [],
+      podcastList: []
+    }
+
+    methods = {
+      tap (item) {
+        this.$root.$navigate(`/pages/detail/index?id=${item.id}&parent=${item.id}`)
+      },
+      scrollToTop () {
+        this.scrollStatus = 'top'
+//        this.reload()
+//         console.log('top')
+      },
+      async scrollToBottom () {
+        this.scrollStatus = 'bottom'
+        // console.log('bottom')
+        // await this.next()
+      },
+      scroll () {
+        this.scrollStatus = 'scrolling'
+        console.log('scrolling...')
+      },
+      async touchStart (e) {
+        const touchPoint = e.touches[0]
+        const clientY = touchPoint.clientY
+        this.clientY = clientY
+//        if (this.clientY > 50) {
+//          this.isRefresh = true
+//        }
+      },
+      async touchEnd (e) {
+        const upPoint = e.changedTouches[0]
+        const endY = upPoint.clientY
+        const pointTopintY = Math.abs(endY - this.clientY)
+        const status = this.scrollStatus
+        // 上拉刷新
+        if (status === 'top' && pointTopintY > 50) {
+//          this.isRefresh = true
+          this.reload()
+        }
+        // 上拉加载
+        if (status === 'bottom' && pointTopintY > 50) {
+          this.isLoadMore = true
+          // await this.next()
+        }
+        // 两秒后隐藏加载条
+        setTimeout(() => {
+          this.isRefresh = false
+          this.isLoadMore = false
+        }, 3000)
+      }
+
+    }
+
+    async onLoad () {
+    }
+    async onShow () {
+      this.app = await Cache.app()
+      this.swiper = this.app.options.swiper
+      this.categories = this.app.options.categories
+
+      //
+      // this.page = podcast.page('youdao')
+      this.categories = await category.list()
+      // console.log(JSON.stringify(this.categories))
+      for (const cate of this.categories) {
+        const podcastPage = await podcast.page(cate.slug)
+        const podcastList = await podcastPage.next()
+        this.loaded()
+        cate.podcastList = podcastList.list
+      }
+      // await this.next()
+      this.loaded()
+    }
+  }
+</script>
+<style lang="scss">
+
+</style>

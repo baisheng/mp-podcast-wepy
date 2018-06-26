@@ -1,0 +1,83 @@
+<style lang="scss">
+  @import "../stylesheets/shared/colors";
+  @import "../stylesheets/shared/mixins/mixins";
+  .section-header.card {
+    display: flex;
+    align-items: center;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    position: relative;
+    line-height: 28px;
+
+    &:after {
+      content: '';
+    }
+
+    &.is-empty .section-header__label:after {
+      content: '\00a0';
+    }
+  }
+
+  .section-header__label {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+
+    &:before {
+      @include long-content-fade( $color : $white );
+    }
+
+    .count {
+      margin-left: 8px;
+    }
+  }
+
+  .section-header__actions {
+    flex-grow: 0;
+    position: relative;
+
+    @include clear-fix;
+  }
+
+  .section-header__label {
+    color: $gray-dark;
+    font-size: 14px;
+  }
+
+  .section-header__actions {
+    .button {
+      float: left;
+      margin-right: 8px;
+    }
+
+    & > .button:last-child {
+      margin-right: 0;
+    }
+  }
+</style>
+<template>
+  <card class="is-compact">
+    <view class="section-header__label">
+      <view class="section-header__label-text">{{ label }}</view>
+    </view>
+    <view class="section-header__actions">
+      <slot></slot>
+    </view>
+  </card>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Card from '../components/card'
+
+  export default class SectionHeader extends wepy.component {
+    components = {
+      card: Card
+    }
+    props = {
+      label: String
+    }
+  }
+</script>

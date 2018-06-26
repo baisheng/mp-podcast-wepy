@@ -1,0 +1,77 @@
+<style lang="scss">
+  .p-box {
+    &--wrap {
+      padding: 0 10rpx;
+    }
+    &__head{
+      padding: 30rpx 30rpx 0;
+      text-align: center;
+      &--title{
+        display: inline-block;
+        padding: 0 40rpx 10rpx 40rpx;
+        font-size: 32rpx;
+        color: #9B9B9B;
+      }
+      &--line{
+        margin: 0 auto;
+        width: 150rpx;
+        height: 2rpx;
+        background-color: #D8D8D8;
+      }
+      &--desc{
+        padding-top: 13rpx;
+        color: #BEBEBE;
+        font-size: 26rpx;
+      }
+    }
+    &__foot{
+      margin: 100rpx 0 30rpx 0;
+      text-align: center;
+      color: #1aad19;
+      font-size: 0;
+      &--icon{
+        width: 152rpx;
+        height: 23rpx;
+      }
+    }
+  }
+</style>
+
+<template>
+  <view class="p-box p-box--wrap">
+    <!-- head -->
+    <view wx:if="{{title || desc}}" class="p-box__head">
+      <view wx:if="{{title}}" class="p-box__head--title">{{title}}</view>
+      <view wx:if="{{title && desc}}" class="p-box__head--line"></view>
+      <view wx:if="{{desc}}" class="p-box__head--desc">{{desc}}</view>
+    </view>
+
+    <slot></slot>
+
+    <!-- foot -->
+    <!--<navigator class="p-box__foot" openType="switchTab" url="/pages/component/index" hover-class="none">-->
+      <!--<image class="p-box__foot&#45;&#45;icon" src="https://s10.mogucdn.com/mlcdn/c45406/170913_0e8g7dl1f2l75a8h6he12436a8024_152x23.png"></image>-->
+    <!--</navigator>-->
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Box extends wepy.component {
+    props = {
+      title: {
+        type: String,
+        default: '示例标题'
+      },
+      desc: {
+        type: String,
+        default: '示例描述'
+      },
+      source: {
+        type: String,
+        default: ''
+      }
+    }
+  }
+</script>

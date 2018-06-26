@@ -1,0 +1,210 @@
+<style lang="scss">
+  @import "../stylesheets/style";
+
+  .is-placeholder {
+    color: transparent;
+    width: 36%;
+    line-height: 24px;
+    margin-top: 8px;
+    background-color: lighten($gray, 30%);
+    animation: loading-fade 1.6s ease-in-out infinite;
+
+    &:before {
+      content: ' ';
+    }
+  }
+
+  .card {
+    display: block;
+    position: relative;
+    margin: 0 auto 10px auto;
+    padding: 16px;
+    box-sizing: border-box;
+    background: $white;
+    box-shadow: 0 0 0 1px transparentize(lighten($gray, 20%), .5),
+    0 1px 2px lighten($gray, 30%);
+    .animate-box {
+      opacity: 0;
+    }
+    .fadeInUp {
+      -webkit-animation-name: fadeInUp;
+      animation-name: fadeInUp;
+    }
+    .animated-fast {
+      -webkit-animation-duration: .5s;
+      animation-duration: .5s;
+      -webkit-animation-fill-mode: both;
+      animation-fill-mode: both;
+    }
+    @include clear-fix;
+
+    @include breakpoint(">480px") {
+      margin-bottom: 16px;
+      padding: 24px;
+    }
+
+    // Compact Card
+    &.is-compact {
+      margin-bottom: 1px;
+
+      //@include breakpoint(">480px") {
+      margin-bottom: 1px;
+      padding: 16px 24px;
+      //}
+    }
+
+    &.is-card-link {
+      padding-right: 48px;
+    }
+
+    &.is-error {
+      box-shadow: inset 3px 0 0 $alert-red;
+    }
+
+    &.is-info {
+      box-shadow: inset 3px 0 0 $blue-wordpress;
+    }
+
+    &.is-success {
+      box-shadow: inset 3px 0 0 $alert-green;
+    }
+
+    &.is-warning {
+      box-shadow: inset 3px 0 0 $alert-yellow;
+    }
+  }
+
+  // Clickable Card
+  .card__link-indicator {
+    color: lighten($gray, 20%);
+    display: block;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 16px;
+  }
+
+  a.card:hover {
+    .card__link-indicator {
+      color: lighten($gray, 10%);
+    }
+  }
+
+  a.card:focus {
+    outline: 0;
+
+    .card__link-indicator {
+      color: $link-highlight;
+    }
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      visibility: hidden;
+      -webkit-transform: translate3d(0, 40px, 0);
+      transform: translate3d(0, 40px, 0);
+    }
+    100% {
+      visibility: visible;
+      opacity: 1;
+      -webkit-transform: none;
+      transform: none;
+    }
+  }
+
+</style>
+<template>
+  <view>
+
+    <view class="card animate-box fadeInUp animated-fast foldable-card is-compact {{isExpanded ? 'is-expanded' : ''}}" >
+      <view class="foldable-card__header is-clickable has-border" @tap="headerTapAction">
+
+        <view class="foldable-card__main">
+          <slot name="header"></slot>
+        </view>
+        <view class="foldable-card__secondary">
+          <view class="foldable-card__summary">
+            <slot name="summary"></slot>
+          </view>
+          <view class="foldable-card__summary-expanded">
+            <slot name="expandedSummary"></slot>
+          </view>
+        </view>
+
+        <!--<button class="foldable-card__action foldable-card__expand"></button>-->
+      </view>
+      <view class="foldable-card__content" wx:if="{{isExpanded}}">
+        <slot></slot>
+      </view>
+      <slot name="footer"></slot>
+    </view>
+  </view>
+
+</template>
+<script>
+  import wepy from 'wepy'
+
+  export default class Card extends wepy.component {
+    props = {
+      id: {
+        type: Number,
+        default: '',
+        twoWay: true
+      },
+      item: {
+        type: Object
+      },
+      tapableHeader: {
+        type: Boolean,
+        default: false
+      },
+      expanded: {
+        type: Boolean,
+        default: false
+      },
+      type: String,
+      className: String,
+      compact: {
+        type: Boolean,
+        default: false
+      },
+      href: String
+    }
+    data = {
+      isExpanded: false
+    }
+    computed = {
+      classes () {
+        // eslint-disable-next-line prefer-const
+        let _class = [
+//          'card animate-box fadeInUp animated-fast'
+        ]
+        if (this.type) {
+          _class.push('is-' + this.type)
+        }
+        if (this.compact) {
+          _class.push('is-compact')
+        }
+        return _class
+      }
+    }
+    methods = {
+      headerTapAction ($event) {
+//        console.log($event)
+//        console.log(this.href)
+//        this.$emit('header-tap', $event)
+        return this.tapableHeader ? this.handleTap() : null
+//        this.current = this.item
+//        this.isExpanded = !this.isExpanded
+//        this.$emit('header-tap', $event)
+      }
+    }
+    handleTap () {
+      this.isExpanded = !this.isExpanded
+    }
+    onLoad () {
+      this.isExpanded = this.expanded
+    }
+  }
+</script>

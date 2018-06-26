@@ -1,0 +1,144 @@
+<template>
+  <view class="mask mask__status--{{status}}">
+    <view class="mask__bg" style="background: rgba({{backgroundColor}},{{opacity}});" bindtap="omMaskTap"></view>
+    <view class="mask__content mask__content--{{cAlign}}" style="{{__positionStyle}}">
+      <slot></slot>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  function hexToRgb (hex) {
+    let color = []
+    let rgb = []
+
+    hex = hex.replace(/#/, '')
+
+    if (hex.length === 3) {
+      let tmp = []
+
+      for (let i = 0; i < 3; i++) {
+        tmp.push(hex.charAt(i) + hex.charAt(i))
+      }
+      hex = tmp.join('')
+    }
+
+    for (let i = 0; i < 3; i++) {
+      color[i] = '0x' + hex.substr(i * 2, 2)
+      rgb.push(parseInt(Number(color[i])))
+    }
+
+    return rgb.join(',')
+  }
+
+  export default class Mask extends wepy.component {
+    props = {
+      status: {
+        type: String,
+        default: 'hide',
+//        observer: function (newStatusValue) {
+//          this.status = newStatusValue
+//        },
+        twoWay: true
+      },
+      opacity: {
+        type: [String, Number],
+        default: 0.6,
+        twoWay: true
+      },
+      backgroundColor: {
+        type: String,
+        default: '#000000',
+        twoWay: true
+      },
+      locked: {
+        type: String,
+        default: 'hide',
+        twoWay: true
+      },
+      contentAlign: {
+        type: String,
+        default: 'tl',
+        twoWay: true
+      },
+      __positionStyle: {
+        type: String,
+        default: 'top:0; left:0',
+        twoWay: true
+      }
+    }
+    data = {
+    }
+    methods = {
+      omMaskTap() {
+//        let data = this.data
+        if (this.locked && this.locked !== 'true') {
+          this.setData({
+            status: 'hide'
+          })
+        }
+      }
+    }
+    onLoad () {
+      this.backgroundColor = hexToRgb(this.backgroundColor)
+
+      let contentAlignStyle
+
+      switch (this.contentAlign) {
+        case 'tl': {
+          contentAlignStyle = 'top:0; left:0'
+          break
+        }
+
+        case 'tr': {
+          contentAlignStyle = 'top:0; right:0'
+          break
+        }
+
+        case 'bl': {
+          contentAlignStyle = 'bottom:0; left:0'
+          break
+        }
+
+        case 'br': {
+          contentAlignStyle = 'bottom:0; right:0'
+          break
+        }
+      }
+
+      this.__positionStyle = contentAlignStyle
+    }
+  }
+</script>
+<style lang="scss">
+  .mask {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100000;
+
+    &__bg {
+      width: 100%;
+      height: 100%;
+    }
+
+    &__content {
+      display: inline-block;
+      position: absolute;
+      z-index: 1;
+    }
+    &__status{
+      &--show{
+
+      }
+      &--hide{
+        opacity: 0;
+        display: none;
+        z-index: -10;
+      }
+    }
+  }
+
+</style>

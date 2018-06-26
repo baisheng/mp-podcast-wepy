@@ -1,0 +1,318 @@
+<style lang="scss">
+  @import '../stylesheets/style';
+
+  $fontcolor: #7b7b7b;
+  $activecolor: #2196F3;
+  .scrollable {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    .container {
+      height: 100%;
+      will-change: transform;
+      position: absolute;
+      .item {
+        height: 100%;
+        position: relative;
+        float: left;
+        box-sizing: border-box;
+        flex-flow: column;
+        .item-self {
+          position: absolute;
+          box-sizing: border-box;
+          margin: 30rpx 18rpx;
+          overflow: hidden;
+          padding: 20rpx;
+          width: 95%;
+          color: #aaa;
+          background-color: white;
+          box-shadow: 0 4rpx 30rpx 0rpx rgba(0, 0, 0, 0.05);
+          border-radius: 5px;
+          display: flex;
+          flex-flow: column;
+          flex-direction: column;
+          align-items:center;
+        }
+      }
+    }
+  }
+  .tab {
+/*    border-top-left-radius: rpx(30);
+    border-top-right-radius: rpx(30);*/
+    color: $fontcolor;
+    /*height: rpx(100);*/
+    width: 95%;
+    border-top-left-radius: rpx(16);
+    border-top-right-radius: rpx(16);
+    margin-left: 9px;
+    /*left: 10px;*/
+    /*right: 10px;*/
+    /* Mask: */
+    background: #FFFFFF;
+    border-top: 1px solid #e5e5e5;
+    /*box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.20);*/
+    /* Background: */
+    /*box-shadow: 0 -2px 15px 0 rgba(0,0,0,0.20);*/
+    /*-webkit-box-shadow:2px 2px 5px #333333;*/
+    /*box-shadow:2px 2px 2px 2px #333333;*/
+    box-shadow:-3px 0 3px rgba(0, 0, 0, 0.10), /*左边阴影*/
+    3px 0 3px rgba(0, 0, 0, 0.10); /*右边阴影*/
+    /* Photo Copy: */
+    font-size: rpx(24);
+    /*box-sizing: border-box;*/
+    white-space: nowrap;
+    .tab_item {
+      border-left: 1px solid rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-flow: row;
+      /*display: inline-block;*/
+      width: 25%;
+      text-align: center;
+      .icon {
+        width: rpx(98);
+        height: rpx(98);
+        display: block;
+        margin: auto;
+      }
+    }
+
+    .toolbar {
+      /*width: calc(100% - 48rpx);*/
+      display: flex;
+    }
+    @-webkit-keyframes AnimationName {
+      0% {
+        background-position: 100% 0%;
+      }
+      100% {
+        background-position: 0% 0%;
+      }
+    }
+    .toolbar {
+      .song {
+        border-top-left-radius: rpx(30);
+        background: #EDF6FF;
+        /* placeholder: */
+        /*background-image: linear-gradient(90deg, #2C1BC5 0%, #53A0FD 18%, #FFFFFF 100%);*/
+        background: -webkit-linear-gradient(right, #edf6ff 0%, #edf6ff 50%, #fff 50%, #fff 100%);
+        /*background: linear-gradient(left, #ffa600 0%, #ffa600 50%, #fff 50%, #fff 100%);*/
+        background-size: 200% 200%;
+        /*-webkit-animation: AnimationName 10s ease infinite;*/
+        display: flex;
+        flex-flow: row;
+        width: 50%;
+        &.is-playing {
+          box-shadow: inset 3px 0 0 $blue-medium;
+          /*animation: loading-fade 1.6s ease-in-out infinite;*/
+        }
+        .album {
+          width: rpx(74);
+          height: rpx(74);
+          margin: rpx(12) rpx(12) rpx(12) rpx(20);
+          border-radius: rpx(10);
+        }
+        .info {
+          /*color: #418AF2;*/
+          flex: 1;
+          align-items: center;
+          justify-content: center;
+          font-size: rpx(24);
+          margin: rpx(20) rpx(20) rpx(20) rpx(8);
+          overflow: hidden;
+          word-break: break-all;
+          text-overflow: ellipsis; //文字隐藏后添加省略号
+          white-space: nowrap; //强制不换行
+
+          .author {
+            font-size: rpx(20);
+            line-height: rpx(32);
+            color: #aaa;
+          }
+        }
+      }
+
+    }
+    .arrow {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #fff;
+      height: rpx(100);
+      text-align: center;
+      width: rpx(52);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-top: 1px solid #f5f5f5;
+      box-sizing: border-box;
+      border-left: 1px solid #f5f5f5;
+      image {
+        width: rpx(24);
+        height: rpx(24);
+      }
+    }
+    .play {
+      display: flex;
+      width: rpx(200);
+      height: 100%;
+    }
+  }
+</style>
+<template>
+
+  <view class="tab">
+    <view class="toolbar" wx:if="{{showToolbar}}">
+      <view class="song {{curplay.play_status === 'playing' ? 'is-playing' : ''}}" @tap="tap" style="background-position:-{{percent}}% -{{downloadPercent}}%">
+        <image class="album" src="{{curplay.authorInfo.avatar}}" background-size="cover"></image>
+        <view class="info">
+          <text class="title">{{curplay.title}}</text>
+          <view class="author">
+            <text>{{curplay.authorInfo.user_nicename}}</text>
+          </view>
+          <view class="timeline"></view>
+        </view>
+      </view>
+      <view class="tab_item" @tap="change(0)">
+        <image class="icon" src="../images/toolbar/discover{{active === 0 ? '_active' : ''}}.png"></image>
+      </view>
+      <view class="tab_item" @tap="change(1)">
+        <image class="icon" src="../images/toolbar/me{{active === 1 ? '_active' : ''}}.png"></image>
+      </view>
+    </view>
+
+  </view>
+</template>
+<script>
+  /* eslint-disable no-undef,no-throw-literal,no-extra-bind,no-extra-parens,no-unused-vars */
+
+  import wepy from 'wepy'
+
+  const $wxapp = wepy.$instance
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+  const DEFAULT = {
+    /**
+     * 必填项
+     */
+    slideLength: 3,                       //  由于目前无法直接获取slide页数，目前只能通过参数写入
+    /**
+     * 可选参数
+     */
+    width: device.windowWidth,
+    height: device.windowHeight,
+    speed: 300,
+    timingFunction: 'ease',               //  过渡动画速度曲线
+    directionViewName: 'directionClass',   //  对应视图中direction类名
+    animationViewName: 'tabAnimationData',   //  对应视图中animation属性名
+    /**
+     * 事件回调
+     * @type {[type]}
+     */
+    onInit: null,                         //  swiper初始化时执行
+    onChange: null
+  }
+  let seek = 0
+
+  export default class Tab extends wepy.component {
+    props = {
+      active: {
+        twoWay: true,
+        type: Number
+      },
+      curplay: {
+        twoWay: true,
+        type: Object
+      },
+      option: {
+        type: Object,
+        twoWay: true
+      }
+    }
+    data = {
+      width: device.windowWidth,
+      height: device.windowHeight,
+      showToolbar: true,
+      playing: true,
+      tabAnimationData: null,
+      animationViewName: 'tabAnimationData',
+      XORY: 'Y',
+      downloadPercent: 0,
+      percent: 0,
+      start: 100,
+      end: 0
+    }
+    watch = {
+//      curplay (newValue, oldValue) {
+//        console.log(newValue.id + 'new value id')
+//      }
+    }
+    methods = {
+      tap () {
+        wx.navigateTo({
+          url: `/pages/detail/index?id=${$wxapp.globalData.curplay.id}&parent=${$wxapp.globalData.curplay.parent}`,
+          success (res) {
+          }
+        })
+      },
+      updatePlayer (curplay) {
+        this.curplay = curplay
+        this.$apply()
+      },
+      showDetail (e) {
+      },
+      change (idx, e) {
+        const {onChange} = this
+        typeof onChange === 'function' && onChange(this, e) //  当手指碰触到slide时执行
+        this.active = +idx
+//        if (this.active === 1) {
+//          this.$invoke('./profile', 'onShow')
+//        }
+        $wxapp.emitter.emit('tab-change', this.active)
+        this.$apply()
+      },
+      playingToggle () {
+        this.playing = !this.playing
+      }
+    }
+
+    /**
+     * 同步设置到视图
+     * @param DEFAULT：默认参数
+     * @param param：构造参数
+     */
+    syncView (viewName, prop) {
+      this[`${viewName}`] = prop
+      this.$apply()
+    }
+
+    initTab () {
+      const {onInit} = this
+      typeof onInit === 'function' && onInit(this)
+    }
+
+    onLoad () {
+      const that = this
+      $wxapp.emitter.on('playing', e => {
+        clearInterval(seek)
+        that.curplay = $wxapp.globalData.curplay
+        that.$apply()
+        $wxapp.playStatus(that)
+        seek = setInterval(() => {
+          $wxapp.playStatus(that)
+        }, 1000)
+      })
+      $wxapp.emitter.on('playing-stop', (e) => {
+        clearInterval(seek)
+      })
+      $wxapp.emitter.on('onload', (e) => {
+        that.curplay = $wxapp.globalData.curplay
+      })
+      const {option} = this
+      const CONFIG = Object.assign(this, DEFAULT, option)
+      this.initTab(CONFIG)
+//      $wxapp.emitter.on('tab-change', (active) => {
+//        that.active = active
+//        that.$apply()
+//      })
+    }
+  }
+</script>

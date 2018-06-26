@@ -1,0 +1,620 @@
+<style lang="scss" scoped>
+
+  /*滑动样式*/
+  .hSwiper {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    .hSwiperCon {
+      height: 100%;
+      will-change: transform;
+      position: absolute;
+      .item {
+        /*width: 100%;*/
+        height: 100%;
+        position: relative;
+        float: left;
+        box-sizing: border-box;
+        flex-flow: column;
+        .itemSelf {
+          position: absolute;
+          box-sizing: border-box;
+          margin: 30rpx 18rpx;
+          overflow: hidden;
+          padding: 20rpx;
+          /*height: 87%;*/
+          height: calc(100% - 160rpx);
+          width: 95%;
+          color: #aaa;
+          background-color: white;
+          box-shadow: 0 0 1px rgba(0, 0, 0, 0.10) inset, /*左边阴影*/
+          0 2px 10px rgba(0, 0, 0, 0.10); /*右边阴影*/
+          /*box-shadow: 0 4rpx 30rpx 0rpx rgba(0, 0, 0, 0.05);*/
+          border-radius: 20rpx;
+          display: flex;
+          flex-flow: column;
+          flex-direction: column;
+          align-items:center;
+          /*justify-content: center;*/
+          text-align: center;
+          .article {
+            height: 100%;
+            display: flex;
+            flex-flow: column;
+            flex-direction: column;
+            align-items:center;
+            text-align: center;
+            width: 650rpx;
+            .cover{
+              margin-top: 100rpx;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              text-align: center;
+              background-position: center center;
+              .play{
+                position: relative;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                z-index: 100;
+              }
+              .play image{
+                width: 96rpx;height:96rpx;
+              }
+            }
+            .info{
+              width: 320rpx;
+              .title {
+                font-size: 36rpx;
+                color: #222;
+                line-height: 36rpx;
+              }
+              .author {
+                color: #222;
+                font-size: 26rpx;
+              }
+            }
+            .detail{
+              margin-top: 20rpx;
+              font-size: 26rpx;
+              padding: 20rpx;
+              line-height: 36rpx;
+              overflow: hidden;
+              word-break:break-all;
+              min-width:0;
+              width: 480rpx;
+              /*height: 200rpx;*/
+              white-space:nowrap;
+              text-overflow:ellipsis;//文字隐藏后添加省略号
+            }
+            .anchor {
+              flex: 1;
+              display: flex;
+              justify-content: center;
+              color: #aaa;
+              flex-flow: column;
+              .avatar {
+                width: 94rpx;
+                height: 94rpx;
+                background-position: center center;
+                border-radius: 50%;
+                border: 1px solid #dadada;
+                box-sizing: border-box;
+              }
+              .name {
+                margin-top: 20rpx;
+                font-size: 26rpx;
+              }
+            }
+          }
+
+        }
+
+      }
+    }
+  }
+</style>
+
+<template>
+
+  <view class="hSwiper">
+    <view class="hSwiperCon"
+          animation="{{animationData}}"
+          @touchstart="touchstart"
+          @touchmove="touchmove"
+          @touchend="touchend"
+          style="width:{{wapperWidth}}px;">
+
+      <block wx:for-items="{{items}}" wx:for-index="index" wx:for-item="item" wx:key="id">
+        <view class="item" style="width: {{itemWidth}}px;" >
+          <view class="itemSelf" style="height: calc(100% - {{selfHeight}});">
+            <view class="article" >
+              <view class="cover" @tap="tapAction({{item}})">
+                <image class="plugin-meta__banner-image post-image__image"
+                       mode="{{item._.header_collapsed ? 'aspectFit': 'aspectFill'}}" src="{{item.featured_image}}"></image>
+              </view>
+              <!--<view class="cover" style=" box-shadow: 0 4rpx 30rpx 0rpx rgba(0, 0, 0, 0.15);  box-sizing: content-box;  background: url({{item.featured_image}});  background-position: center center; {{item.type === 'book' ? 'border: 1px solid #fafafa; width: 248.41rpx; height: 350rpx; background-size: 248.41rpx 350rpx;' : 'border: 3px solid #fafafa; width:535rpx; height: 380rpx; background-size: 535rpx 380rpx; '}}">-->
+                <!--<view class="play">-->
+                  <!--&lt;!&ndash; 有播放状态的专辑 &ndash;&gt;-->
+                  <!--<image class="" src="../images/quick/pause_big.png" @tap="stop({{item}})" hidden="{{!(curplay.id === item.id && curplay.status == 'playing')}}"></image>-->
+                  <!--<image class="" src="../images/quick/play_big.png" @tap="playList({{item}})" hidden="{{!(curplay.id === item.id && curplay.status == 'stop')}}"></image>-->
+                  <!--&lt;!&ndash; 没有状态的专辑 &ndash;&gt;-->
+                  <!--<image class="" src="../images/quick/play_big.png" @tap="playList({{item}})" hidden="{{!(curplay.id !== item.id)}}"></image>-->
+                <!--</view>-->
+              <!--</view>-->
+              <view class="info" @tap="tapAction({{item}})">
+                <text class="title">
+                  {{item.title}}
+                </text>
+                <!--<text class="author" wx:if="{{item.type === 'book'}}">-->
+                  <!--{{item.author.nicename}}-->
+                <!--</text>-->
+              </view>
+              <view class="detail">
+                  {{item.except}}
+              </view>
+              <view class="anchor" @tap="showAuthor({{item.author.login}})">
+                <image class="avatar" src="{{item.author.avatar}}" mode="aspectFill"></image>
+                <text class="name">{{item.author.nicename}}</text>
+              </view>
+            </view>
+
+          </view>
+        </view>
+      </block>
+
+    </view>
+  </view>
+</template>
+
+<script>
+  /* eslint-disable no-unused-vars,no-undef,no-multi-spaces,no-throw-literal */
+
+  import wepy from 'wepy'
+
+  import base from '../mixins/_base'
+  import pagination from '../mixins/pagination'
+  import podcast from '../api/podcast'
+
+//  import http from '../mixins/http'
+//  import base from '../mixins/base'
+//  import { api } from '../config'
+
+  const $wxapp = wepy.$instance
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+  const DEFAULT = {
+    /**
+     * 必填项
+     */
+    slideLength: 3,                       //  由于目前无法直接获取slide页数，目前只能通过参数写入
+    items: [],
+    /**
+     * 可选参数
+     */
+    width: device.windowWidth,
+    height: device.windowHeight,
+    direction: 'horizontal',
+    initialSlide: 0,
+    speed: 300,
+    timingFunction: 'ease',               //  过渡动画速度曲线
+    autoplay: 0,                          //  自动播放间隔，设置为0时不自动播放
+    directionViewName: 'directionClass',   //  对应视图中direction类名
+    animationViewName: 'animationData',   //  对应视图中animation属性名
+    /**
+     * 事件回调
+     * @type {[type]}
+     */
+    onInit: null,                         //  swiper初始化时执行
+    onTouchStart: null,                   //  手指碰触slide时执行
+    onTouchMove: null,                    //  手指碰触slide并且滑动时执行
+    onTouchEnd: null,                     //  手指离开slide时执行
+    onSlideChangeStart: null,             //  slide达到过渡条件时执行
+    onSlideChangeEnd: null,               //  swiper从一个slide过渡到另一个slide结束时执行
+    onTransitionStart: null,              //  过渡时触发
+    onTransitionEnd: null,                //  过渡结束时执行
+    onSlideMove: null,                    //  手指触碰swiper并且拖动slide时执行
+    onSlideNextStart: null,               //  slide达到过渡条件 且规定了方向 向前（右、下）切换时执行
+    onSlideNextEnd: null,                 //  slide达到过渡条件 且规定了方向 向前（右、下）切换结束时执行
+    onSlidePrevStart: null,               //  slide达到过渡条件 且规定了方向 向前（左、上）切换时执行
+    onSlidePrevEnd: null                  //  slide达到过渡条件 且规定了方向 向前（左、上）切换结束时执行
+  }
+
+  export default class weSwiper extends wepy.component {
+    mixins = [base, pagination]
+
+    data = {
+      directionClass: 'we-container-horizontal',
+      animationData: null,
+      wapperWidth: 0,
+      itemWidth: 0,
+      items: [],
+      curplay: {
+        id: '2',
+        playing: false,
+        status: 'stop'
+      }
+      // isIpx: $wxapp.globalData.isIpx
+    }
+
+    props = {
+      option: Object
+    }
+    watch = {
+      curplay (newValue, oldValue) {
+      }
+    }
+    computed = {
+      selfHeight () {
+        return $wxapp.globalData.isIpx ? '240rpx' : '200rpx'
+      }
+    }
+    methods = {
+      tapAction (item, $event) {
+        this.$root.$navigate(`/pages/detail/index?id=${item.id}&parent=${item.id}`)
+//        })
+//        this.$emit('header-tap', $event)
+      },
+      showAuthor (userId) {
+        this.$root.$navigate(`/pages/author/index?id=${userId}`)
+      },
+      togglePlay (item) {
+        if (this.curplay.id === item.id) {
+          this.curplay.playing = !this.curplay.playing
+        }
+      },
+      stop(item) {
+        $wxapp.stopMusic()
+        item.status = 'stop'
+        this.curplay.status = 'stop'
+        this.curplay.id = item.id
+        console.log('停止' + this.curplay.status + ':' + this.curplay.id)
+        $wxapp.emitter.emit('play-stop')
+      },
+      playList (item) {
+        // 1 播放列表
+        // 2 当前正在播放的默认为列表的第一项
+        $wxapp.globalData.album = item
+        $wxapp.globalData.curplay = {
+          id: item.id,
+          album: item.album,
+          author: item.author,
+          anchor: item.anchor,
+          songname: item.list[0].songname,
+          status: 'playing',
+          src: item.list[0].src
+        }
+        $wxapp.globalData.playindex = 0
+        $wxapp.playing()
+        $wxapp.emitter.emit('playing')
+//        this.$invoke('../tab', 'updatePlayer', item)
+      },
+      tap (item) {
+//        console.log(JSON.stringify(item))
+        wx.navigateTo({
+          url: '/pages/detail?id=' + item.id,
+          success (res) {
+          }
+        })
+      },
+      touchstart (e) {
+//        console.log('touchstart')
+        const {onTouchStart, XORY, activeIndex, rectDistance} = this
+        const touch = e.changedTouches[0]
+        const distance = touch[`client${XORY}`] // startPos
+        const translate = -activeIndex * this.itemWidth + 30
+        this[`touchStart${XORY}`] = distance
+        this[`translate${XORY}`] = translate
+        this.touchStartTime = new Date().getTime()
+        this.startPos = e.changedTouches[0].clientX
+        typeof onTouchStart === 'function' && onTouchStart(this, e) //  当手指碰触到slide时执行
+        this.slideAnimation(translate, 0)
+      },
+
+      touchmove (e) {
+//        console.log('touchmove')
+        const {onTouchMove, XORY, onSlideMove} = this
+        const touch = e.changedTouches[0]
+        const distance = touch[`client${XORY}`]
+        const tmpMove = this[`translate${XORY}`] + distance - this[`touchStart${XORY}`]
+        typeof onTouchMove === 'function' && onTouchMove(this, e) //  手指碰触slide并且滑动时执行
+        const self = this
+        self.endPos = e.changedTouches[0].clientX
+        const maxPos = 30
+        const minPos = -this.itemWidth * 2 - 30
+        if (this.tmpMove > maxPos) {
+          this.tmpMove = maxPos
+        }
+        if (this.tmpMove < minPos) {
+          this.tmpMove = minPos
+        }
+        this.slideAnimation(tmpMove, 0)
+
+        typeof onSlideMove === 'function' && onSlideMove(this)
+      },
+
+      touchend (e) {
+        const {onTouchEnd, XORY, speed, touchStartTime, rectDistance} = this
+        const touch = e.changedTouches[0]
+        const distance = touch[`client${XORY}`]
+        const touchEndTime = new Date().getTime()
+
+        const action = this.action(touchStartTime, touchEndTime, this[`touchStart${XORY}`], distance, rectDistance)
+        typeof onTouchEnd === 'function' && onTouchEnd(this, e) //  手指离开slide时执行
+        this[action](true, speed)
+      }
+    }
+
+    events = {}
+
+    /**
+     * 切换控制器
+     * @param touchStartTime： 手指触碰slide时的时间戳
+     * @param et： 手指离开slide时的时间戳
+     * @param from： 手指触碰slide时的屏幕位置
+     * @param to： 手指离开slide时的屏幕位置
+     * @param wrapperDistance： slide滑动方向上的容器长度
+     * @returns {*}
+     */
+    action(touchStartTime, touchEndTime, from, to, wrapperDistance) {
+      const {
+        activeIndex,
+        slideLength,
+        onTransitionStart
+      } = this
+      const deltaTime = touchEndTime - touchStartTime  //  手指触摸时长
+      const distance = Math.abs(to - from)  //  滑动距离
+
+      const k = distance / deltaTime
+      if (to > from) {
+        typeof onTransitionStart === 'function' && onTransitionStart(self)  // slide达到过渡条件时执行
+        return (k > 0.3 || distance > wrapperDistance / 2) ? (activeIndex === 0 ? 'slideBack' : 'slidePrev') : 'slideBack'
+      }
+
+      if (to < from) {
+        typeof onTransitionStart === 'function' && onTransitionStart(self)  // slide达到过渡条件时执行
+        return (k > 0.3 || distance > wrapperDistance / 2) ? (activeIndex === slideLength - 1 ? 'slideBack' : 'slideNext') : 'slideBack'
+      }
+
+      if (to === from) {
+        return 'slideBack'
+      }
+    }
+
+    /**
+     * 切换至下一个slide
+     * @param runCallbacks： 可选，boolean，设置为false时不会触发onSlideChange回调函数
+     * @param speed: 可选，num(单位ms)，切换速度
+     */
+    slideNext(runCallbacks = false, speed = 300) {
+      const self = this
+      const {
+        onSlideNextStart,
+        onSlideNextEnd
+      } = self
+
+      typeof onSlideNextStart === 'function' && onSlideNextStart(self)  // slide达到过渡条件时执行
+
+      self.slideTo(self.activeIndex + 1, speed, runCallbacks)
+
+      typeof onSlideNextEnd === 'function' && setTimeout(() => {
+        onSlideNextEnd(self)
+      }, speed)  //  slide过渡结束后执行
+    }
+
+    /**
+     * 切换至上一个slide
+     * @param runCallbacks： 可选，boolean，设置为false时不会触发onSlideChange回调函数
+     * @param speed: 可选，num(单位ms)，切换速度
+     */
+    slidePrev(runCallbacks = false, speed = 300) {
+      const self = this
+      const {
+        onSlidePrevStart,
+        onSlidePrevEnd
+      } = self
+
+      typeof onSlidePrevStart === 'function' && onSlidePrevStart(self)  // slide达到过渡条件时执行
+
+      self.slideTo(self.activeIndex - 1, speed, runCallbacks)
+
+      typeof onSlidePrevEnd === 'function' && setTimeout(() => {
+        onSlidePrevEnd(self)
+      }, speed)  //  slide过渡结束后执行
+    }
+
+    /**
+     * 回弹
+     * @param runCallbacks: 可选，boolean，设置为false时不会触发onSlideChange回调函数
+     * @param speed: 可选，num(单位ms)，切换速度
+     */
+    slideBack(runCallbacks = false, speed = 300) {
+      const self = this
+      const {
+        XORY,
+        activeIndex,
+        rectDistance,
+        onTransitionEnd
+      } = self
+
+//      const translate = -activeIndex * rectDistance + 30
+      const translate = -activeIndex * this.itemWidth + 30
+
+      self.slideAnimation(translate, speed)
+
+      typeof onTransitionEnd === 'function' && setTimeout(() => {
+        onTransitionEnd(self)
+      }, speed)  //  slide过渡结束后执行
+    }
+
+    /**
+     * 切换到指定slide
+     * @param index：必选，num，指定将要切换到的slide的索引
+     * @param speed：可选，num(单位ms)，切换速度
+     * @param runCallbacks：可选，boolean，设置为false时不会触发onSlideChange回调函数
+     */
+    slideTo(index, speed = 300, runCallbacks = false) {
+      const self = this
+      const {
+        slideLength,
+        activeIndex,
+        rectDistance,
+        onSlideChangeStart,
+        onSlideChangeEnd,
+        onTransitionEnd,
+        consoleException
+      } = self
+
+      try {
+        if (typeof index !== 'number') throw 'paramType' //  参数类型错误
+        if (index < 0 || index > slideLength - 1) throw 'bound'   //  越界
+
+        const translate = -index * this.itemWidth + 30
+        self.previousIndex = activeIndex
+        self.activeIndex = index
+        self.isBeginning = self.activeIndex === self.initialSlide
+        self.isEnd = self.activeIndex === self.slideLength - 1
+
+        runCallbacks && typeof onSlideChangeStart === 'function' && onSlideChangeStart(self)  // slide达到过渡条件时执行
+
+        self.slideAnimation(translate, speed)
+
+        runCallbacks && typeof onSlideChangeEnd === 'function' && setTimeout(() => {
+          onSlideChangeEnd(self)
+        }, speed)  //  swiper从一个slide过渡到另一个slide结束后执行
+        typeof onTransitionEnd === 'function' && setTimeout(() => {
+          onTransitionEnd(self)
+        }, speed)  //  slide过渡结束后执行
+      } catch (err) {
+        consoleException(err, 'slideTo[Function]')
+      }
+    }
+
+    /**
+     * 平移动画
+     * @param translate：平移位置
+     * @param speed：过渡时长
+     * @param timingFunction：过渡类型
+     */
+    slideAnimation(translate = 0, speed = 300, timingFunction = 'linear') {
+      const REG = {
+        TRANSLATE: /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/,
+        SPEED: /^(0|[1-9][0-9]*|-[1-9][0-9]*)$/,
+        TIMINGFUNCTION: /linear|ease|ease-in|ease-in-out|ease-out|step-start|step-end/
+      }
+
+      const {XORY, animationViewName, consoleException} = this
+      try {
+        /**
+         * 异常处理
+         */
+        if (!REG.TRANSLATE.test(translate)) throw 'paramType'
+        if (!REG.SPEED.test(speed)) throw 'paramType'
+        if (!REG.TIMINGFUNCTION.test(timingFunction)) throw 'paramType'
+        /**
+         * 创建一个动画实例
+         */
+        const animation = wx.createAnimation({
+          transformOrigin: '50% 50%',
+          duration: speed,
+          timingFunction,
+          delay: 0
+        })
+        // + 30 -60
+        animation[`translate${XORY}`](translate).step()  //  动画描述
+        this.syncView(animationViewName, animation)  //  同步动画到视图
+      } catch (err) {
+        consoleException(err, 'slideAnimation[Function]')
+      }
+    }
+
+    /**
+     * 同步设置到视图
+     * @param DEFAULT：默认参数
+     * @param param：构造参数
+     */
+    syncView(viewName, prop) {
+      this[`${viewName}`] = prop
+      this.$apply()
+    }
+
+    /**
+     * 错误对照
+     */
+    consoleException(type, place) {
+      const ERROR = {
+        'paramType': '参数类型错误',
+        'bound': '参数越界'
+      }
+      console.log(`%c${place}:${ERROR[type]}`, 'color: red')
+    }
+
+    /**
+     * 初始化配置
+     */
+    initSwiper(param) {
+      const {
+        speed,
+        items,
+        slideLength,
+        initialSlide,
+        direction,
+        autoplay,
+        directionViewName
+      } = param
+      const directionClass = direction === 'horizontal' ? 'we-container-horizontal' : 'we-container-vertical'
+      this.syncView(directionViewName, directionClass)
+      this.rectDistance = direction === 'horizontal' ? this.width : this.height
+      this.XORY = direction === 'horizontal' ? 'X' : 'Y'
+      this.activeIndex = initialSlide  //  将初始页码赋给activeIndex
+      this.noSwiper = false  //  阻止手势滑动
+      this.previousIndex = initialSlide  //  返回上一个活动块的索引，切换前的索引
+      this.slideTo(initialSlide, 0)
+      typeof autoplay === 'number' && autoplay > 0 && setInterval(() => {
+        if (this.isEnd) {
+          this.slideTo(0, speed)
+        } else {
+          this.slideTo(this.activeIndex + 1, speed)
+        }
+      }, autoplay)
+//      this.itemWidth = this.rectDistance - 80
+      this.itemWidth = this.width - 60
+//      console.log(this.slideLength * this.rectDistance)
+      this.wapperWidth = this.slideLength * this.rectDistance
+      this.$apply()
+      /**
+       * 处理callback
+       */
+      const {onInit} = this
+      typeof onInit === 'function' && onInit(this)
+    }
+
+//    async onShow() {
+//
+//    }
+    async onShow() {
+      this.page = await podcast.stickys()
+      await this.next()
+      this.loaded()
+      $wxapp.emitter.emit('stickys-onload', this.page.list[0])
+      // console.log(JSON.stringify(this.page.list[0]))
+//      console.log('recommend onload')
+//      this.page = await podcast.stickys()
+//      await this.next()
+//      this.loaded()
+//      console.log(this.page.list[0])
+//      console.log(JSON.stringify(this.option.curplay))
+      const {option} = this
+      const CONFIG = Object.assign(this, DEFAULT, option)
+      CONFIG.items = this.page.list
+      CONFIG.slideLength = this.page.list.length
+      this.initSwiper(CONFIG)
+
+      $wxapp.emitter.on('playing', (e) => {
+        this.curplay = $wxapp.globalData.curplay
+        this.curplay.status = 'playing'
+        console.log('playing event')
+      })
+    }
+  }
+</script>

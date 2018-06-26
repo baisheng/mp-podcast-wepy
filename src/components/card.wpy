@@ -1,0 +1,135 @@
+<style lang="scss">
+  @import "../stylesheets/style";
+  /*@import "../stylesheets/shared/colors";*/
+  /*@import "../stylesheets/shared/mixins";*/
+  .card {
+    display: block;
+    position: relative;
+    margin: 0 auto 10rpx auto;
+    padding: 16rpx;
+    box-sizing: border-box;
+    background: $white;
+    box-shadow: 0 0 0 1rpx transparentize(lighten($gray, 20%), .5),
+    0 1rpx 2rpx lighten($gray, 30%);
+    .animate-box {
+      opacity: 0;
+    }
+    .fadeInUp {
+      -webkit-animation-name: fadeInUp;
+      animation-name: fadeInUp;
+    }
+    .animated-fast {
+      -webkit-animation-duration: .5s;
+      animation-duration: .5s;
+      -webkit-animation-fill-mode: both;
+      animation-fill-mode: both;
+    }
+    @include clear-fix;
+
+
+    // Compact Card
+    &.is-compact {
+      margin-bottom: 1rpx;
+
+      //@include breakpoint(">480rpx") {
+      margin-bottom: 1rpx;
+      padding: 16rpx 24rpx;
+      //}
+    }
+
+    &.is-card-link {
+      padding-right: 48rpx;
+    }
+
+    &.is-error {
+      box-shadow: inset 3rpx 0 0 $alert-red;
+    }
+
+    &.is-info {
+      box-shadow: inset 3rpx 0 0 $blue-wordpress;
+    }
+
+    &.is-success {
+      box-shadow: inset 3rpx 0 0 $alert-green;
+    }
+
+    &.is-warning {
+      box-shadow: inset 3rpx 0 0 $alert-yellow;
+    }
+  }
+
+  // Clickable Card
+  .card__link-indicator {
+    color: lighten($gray, 20%);
+    display: block;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 16rpx;
+  }
+  .card__blockquote {
+    width: rpx(600);
+      display: -webkit-box;
+      word-break: break-all;
+      text-overflow: ellipsis;
+      font-size: 26rpx;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp:2;
+  }
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      visibility: hidden;
+      -webkit-transform: translate3d(0, 40rpx, 0);
+      transform: translate3d(0, 40rpx, 0);
+    }
+    100% {
+      visibility: visible;
+      opacity: 1;
+      -webkit-transform: none;
+      transform: none;
+    }
+  }
+
+</style>
+<template>
+  <view class="card animate-box fadeInUp animated-fast {{classes}}">
+    <slot></slot>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+
+  export default class Card extends wepy.component {
+    props = {
+      type: String,
+      className: String,
+      compact: {
+        type: Boolean,
+        default: false
+      },
+      href: String
+    }
+    computed = {
+      classes () {
+        // eslint-disable-next-line prefer-const
+        let _class = [
+//          'card animate-box fadeInUp animated-fast'
+        ]
+        if (this.type) {
+          _class.push('is-' + this.type)
+        }
+        if (this.compact) {
+          _class.push('is-compact')
+        }
+        return _class
+      }
+    }
+
+    onLoad () {
+      console.log('card .load')
+      console.log(this.compact)
+    }
+  }
+</script>

@@ -1,0 +1,374 @@
+<style lang="scss">
+  @import "./stylesheets/style";
+</style>
+
+<script>
+  /* eslint-disable eol-last,spaced-comment,no-undef */
+  /* eslint-disable no-undef,no-useless-return,no-unneeded-ternary,no-unused-vars,no-unused-expressions */
+
+  // ENV
+  const env = 'production' // 'development' or 'production'
+
+  // APP VERSION
+  const version = 'v1'
+
+  // development and production host
+  const hosts = {
+    development: `http://api.picker.la/${version}`,
+    production: `https://api.picker.remote/${version}`
+  }
+  const APPID = 'S11SeYT2W'
+  const APP_API = `${hosts[env]}/apps/${APPID}`
+
+  import wepy from 'wepy'
+  import mitt from 'mitt'
+  import WxUtils from './utils/WxUtils'
+  import 'wepy-async-function'
+  import {api} from './config'
+  import AudioStore from './utils/audioStore'
+
+  export default class extends wepy.app {
+    constructor () {
+      super()
+      // 注册中间件
+      this.use('requestfix')
+      this.use('promisify')
+      // 处理全局请求 Header
+      this.intercept('request', {
+        config (p) {
+          p.header = this.createAuthHeader()
+          return p
+        }
+      })
+      this.intercept('uploadFile', {
+        config (p) {
+          p.header = this.createAuthHeader()
+          return p
+        },
+        success (p) {
+          return p.data
+        }
+      })
+    }
+
+    /**
+     * 构造权限头部
+     */
+    createAuthHeader () {
+      const _token = wepy.$instance.globalData.auth._token
+      const header = {}
+      if (_token) {
+        header['Authorization'] = `Bearer ${_token}`
+      }
+      return header
+    }
+
+    audioStore = new AudioStore()
+    emitter = mitt()
+    globalAudioManager = wx.getBackgroundAudioManager()
+    audioControl () {
+      const that = this
+      // 播放列表中下一首
+//      wx.onBackgroundAudioStop(() => {
+//        if (that.globalData.globalStop) {
+//          return
+//        }
+//        that.playNext()
+//      })
+
+      wx.onBackgroundAudioPause(() => {
+//        this.emitter.emit('audio_toggle', {
+//          playing: false,
+//          curplay: this.globalData.curplay || {}
+//        })
+//        that.globalData.playing = false
+//        that.globalData.globalStop = false
+//        that.globalData.curplay.status = false
+//        that.globalData.globalStop = that.globalData.hide ? true : false
+        wx.getBackgroundAudioPlayerState({
+          complete (res) {
+            that.globalData.currentPosition = res.currentPosition ? res.currentPosition : 0
+//            console.log(that.globalData.currentPosition)
+          }
+        })
+      })
+    }
+
+    onLaunch (param) {
+      // 校验SDK
+      WxUtils.checkSDK()
+      // 同步权限数据
+      this.syncStoreConfig('_token')
+//      this.syncStoreConfig('third_session');
+      this.syncStoreConfig('user')
+
+      // 获取保存场景值
+      if (param && param.scene) {
+        console.info('[scene]onLaunch scene', param.scene)
+        wepy.$instance.globalData.scene = param.scene
+        console.info('[auth]onLaunch end')
+      }
+      this.audioControl()
+      this.device = wx.getSystemInfoSync()  //  获取设备信息
+      console.log(this.device)
+      this.globalData.isIpx = this.device.model.indexOf('iPhone X') >= 0
+    }
+
+    syncStoreConfig (key) {
+      try {
+        const value = wepy.getStorageSync(key)
+        if (value !== '') {
+          console.info(`[auth]${key} sync success `)
+          wepy.$instance.globalData.auth[key] = value
+        }
+      } catch (e) {
+        console.warn(`[auth]${key} sync fail `)
+      }
+    }
+
+    config = {
+      pages: [
+//        'pages/detail/index',
+        'pages/index',
+        'pages/home/login',
+        'pages/detail/index',
+        'pages/detail/comment',
+        'pages/feed/index',
+        'pages/author/index'
+      ],
+      window: {
+        backgroundTextStyle: 'dark',
+        backgroundColor: '#FFFFFF',
+        navigationBarTextStyle: 'black',
+        navigationBarBackgroundColor: '#ffffff',
+        navigationBarTitleText: '育儿柚道'
+      }/*,
+      tabBar: {
+        color: '#4A4A4A',
+        selectedColor: '#56abe4',
+        backgroundColor: '#fff',
+        borderStyle: 'white',
+        list: [{
+          pagePath: 'pages/index',
+          text: '首页',
+          iconPath: 'images/home.png',
+          selectedIconPath: 'images/home_on.png'
+        }, {
+          pagePath: 'pages/podcast',
+          text: '柚道',
+          iconPath: 'images/podcast.png',
+          selectedIconPath: 'images/podcast_on.png'
+        }, {
+          pagePath: 'pages/ask',
+          text: '柚答',
+          iconPath: 'images/ask.png',
+          selectedIconPath: 'images/ask_on.png'
+        }, {
+          pagePath: 'pages/mine',
+          text: '我的',
+          iconPath: 'images/user.png',
+          selectedIconPath: 'images/user_on.png'
+        }]
+      }*/
+    }
+    globalData = {
+      auth: {},
+      scene: '',
+      appType: '',
+      appName: '',
+//      app_code: 'S11SeYT2W',
+      baseUrl: APP_API,
+      options: {},
+      user: null,
+      userInfo: null,
+      hasLogin: false,
+      hide: false,
+      playlist: [],
+      playindex: 0,
+      list_am: [],
+      index_am: 0,
+      playing: false,
+      playtype: 1,
+      player: {
+        type: '',
+        index: [],
+        list: [],
+        cur: {}
+      },
+      curplay: {
+        id: '',
+        authorInfo: {},
+        title: {},
+        url: '',
+        play_status: 'stop',
+        play_style: {}
+      },
+      shuffle: 1,
+      globalStop: true,
+      currentPosition: 0,
+      staredList: []
+      // model: this.device.model
+      // isIpx: this.device.model.indexOf('iPhone X')
+    }
+
+    playAudio (cb, seek) {
+    }
+
+    playing (type, cb, seek) {
+      const that = this
+      const m = that.globalData.curplay
+      wx.playBackgroundAudio({
+        dataUrl: m.url,
+        title: m.songname,
+        success (res) {
+          if (seek !== undefined) {
+            wx.seekBackgroundAudio({position: seek})
+          }
+          that.globalData.curplay = Object.assign({}, {play_status: 'playing'}, m)
+          that.emitter.emit('audio_toggle', {
+            playing: true,
+            curplay: that.globalData.curplay || {}
+          })
+          cb && cb()
+        },
+        fail () {
+          console.log('fail --- play next')
+        }
+      })
+    }
+
+    // 音频播放
+    stopMusic (type, cb) {
+      wx.stopBackgroundAudio()
+    }
+
+    pauseMusic () {
+      wx.pauseBackgroundAudio()
+    }
+
+    seekMusic (type, seek, cb) {
+//      const that = this
+//      const m = this.globalData.curplay
+//      if (!m.id) return
+//      this.globalData.playtype = type
+      this.playing(type, cb, seek)
+    }
+
+    sleep (s) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve('promise resolved')
+        }, s * 1000)
+      })
+    }
+
+    playStatus (that) {
+//      console.log(this.globalData.globalStop)
+//      if (this.globalData.globalStop) {
+//        that.percent = 0.1
+//        that.playing = false
+//        that.downloadPercent = 0
+//        return
+//      }
+      const _that = this
+      wx.getBackgroundAudioPlayerState({
+        complete (res) {
+          let {time, playtime, downloadPercent} = 0
+          let playing = false
+          if (res.status !== 2) {
+            time = res.currentPosition / res.duration * 100
+            playtime = res.currentPosition
+            downloadPercent = res.downloadPercent
+//            console.log(time + ':' + playtime)
+          }
+          if (res.status === 1) {
+            playing = true
+          }
+//          _that.globalData.playing = playing
+          that.playtime = _that.formatDuration(playtime * 1000)
+          that.percent = time
+          that.playing = playing
+          that.downloadPercent = downloadPercent
+          that.$apply()
+        }
+      })
+    }
+
+    prePlay () {
+      // 歌曲切换，停止当前音乐
+      this.globalData.playing = false
+      this.globalData.globalStop = true
+      wx.pauseBackgroundAudio()
+    }
+
+    playNext (cb, pos) {
+      // 播放列表中下一首
+      this.prePlay()
+      const list = this.globalData.playlist
+      let index = this.globalData.playindex
+//      if (t === 1) {
+      index++
+//      } else {
+//        index--
+//      }
+      index = index > list.length - 1 ? 0 : (index < 0 ? list.length - 1 : index)
+      index = pos !== undefined ? pos : index
+      this.globalData.curplay = Object.assign({}, list[index], {play_status: 'playing'}) || this.globalData.curplay
+      this.globalData.playindex = index
+      // 发出播放事件
+//      this.seekMuskc()
+//      this.emitter.emit('audio_toggle', {
+//      })
+      this.playing()
+      cb && cb()
+    }
+
+    playAlrc (that) {
+      if (this.globalData.globalStop) {
+        that.playtime = '00:00'
+        that.duration = '00:00'
+        that.percent = 0.1
+        that.playing = false
+        that.downloadPercent = 0
+        return
+      }
+//      if (that.curplay.id !== this.globalData.curplay.id) {
+//        that.curplay = this.globalData.curplay
+//        that.duration = this.formatDuration(this.globalData.curplay.duration || this.globalData.curplay.dt)
+//      wx.setNavigationBarTitle({title: this.globalData.curplay.title})
+      that.$apply()
+//      }
+      const _that = this
+      wx.getBackgroundAudioPlayerState({
+        complete (res) {
+          let {time, playtime, downloadPercent} = 0
+          let playing = false
+          if (res.status !== 2) {
+            time = res.currentPosition / res.duration * 100
+            playtime = res.currentPosition
+            downloadPercent = res.downloadPercent
+          }
+          if (res.status === 1) {
+            playing = true
+          }
+          _that.globalData.playing = playing
+          that.playtime = _that.formatDuration(playtime * 1000)
+          that.percent = time
+          that.playing = playing
+          that.downloadPercent = downloadPercent
+          that.$apply()
+        }
+      })
+    }
+
+    formatNumber (n) {
+      n = n.toString()
+      return n[1] ? n : '0' + n
+    }
+
+    formatDuration (duration) {
+      duration = new Date(duration)
+      return this.formatNumber(duration.getMinutes()) + ':' + this.formatNumber(duration.getSeconds())
+    }
+  }
+</script>

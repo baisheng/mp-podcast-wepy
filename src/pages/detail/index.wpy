@@ -1,0 +1,740 @@
+<style type="scss" scoped>
+  @import "../../stylesheets/style";
+  @import '../../stylesheets/shared/functions';
+  Page, .body {
+    font-family: '\5FAE\8F6F\96C5\9ED1', arial;
+    background: #FAFAFC;
+    /*background: #ECEDF0;*/
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /*box-sizing: border-box;*/
+    position: relative;
+  }
+  .book-content {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    font-size: 26rpx;
+    color: #808080;
+    .bookinfo {
+      height: 200rpx;
+      background: #fff;
+      /*border-bottom: 1px solid rgba(255,255,255,0.70);*/
+      box-shadow: 0 -4px 30px 0 rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      text-align: left;
+      margin: 0 auto;
+      width: 100%;
+      .cover {
+        margin-left: 34rpx;
+        width: 94rpx;
+        height: 147.58rpx;
+      }
+      .detail {
+        margin-left: 34rpx;
+        /*flex: 1;*/
+        line-height: 36rpx;
+        font-size: 24rpx;
+        display: flex;
+        flex-flow: column;
+        .title {
+          display: block;
+          font-size: 28rpx;
+          margin-bottom: 10rpx;
+        }
+        .author {
+          overflow:hidden;
+          word-break:break-all;
+          min-width:0;
+          width: 558rpx;
+          white-space:nowrap;
+          text-overflow:ellipsis;//文字隐藏后添加省略号
+        }
+      }
+    }
+    #timeline{
+      position: relative;
+      display: flex;
+      width: 96%;
+      z-index: 10;
+      left: 0rpx;
+      right: 0rpx;
+
+      .time {
+        display: block;
+        font-size: 20rpx;
+        color: rgba(0, 0, 0, 0.38);
+        z-index: 3;
+        text-align: center;
+        width: 100rpx;
+      }
+      progress {
+        width: 730rpx;
+        /*margin-left: 10rpx;*/
+        /*margin-right: 10rpx;*/
+        margin: 0 auto;
+        /*color: #fafafa;*/
+        position: relative;
+        border-radius: 4rpx;
+      }
+      #playstate {
+        position: absolute;
+        display: block;
+        height: 15rpx;
+        width: 15rpx;
+        overflow: hidden;
+        background: #fff;
+        /* Oval 3: */
+        /*background: #418AF2;*/
+        /*border: 1px solid #FFFFFF;*/
+        /*box-shadow: 0 0 10px 0 #418AF2;*/
+
+        /* Oval 3: */
+        box-shadow: 0 0px 5px 0 rgba(74, 144, 226, 1);
+        border: 3rpx solid #4385F4;
+        border-radius: 50%;
+        top: 50%;
+        margin-left: 20rpx;
+        left: 0;
+        /*let: 20rpx;*/
+        /*right: 20rpx;*/
+        transform: translate3d(-50%, -50%, 0);
+        z-index: 2;
+      }
+      #dpstate {
+        position: absolute;
+        height: 2px;
+        width: 0rpx;
+        background: #4385F4;
+        overflow: hidden;
+        left: 0;
+        top: 50%;
+        margin-top: -1px;
+      }
+      slider {
+        position: absolute;
+        left: 20rpx;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        opacity: 0;
+        z-index: 10;
+      }
+    }
+
+  }
+
+  #user {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    /*height: rpx(176);*/
+    background: #fff;
+    .avatar {
+      width: rpx(76);
+      height: rpx(76);
+      /*margin-left: rpx(30);*/
+      background-position: center center;
+      border-radius: 50%;
+      border: 1px solid #efefef;
+    }
+    .avatar--round {
+      border-radius: rpx(12);
+    }
+    .info {
+      margin-left: rpx(30);
+      display: flex;
+      color: #808080;
+    }
+  }
+
+  #anchor {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    height: rpx(176);
+    background: #fff;
+    .avatar {
+      width: rpx(94);
+      height: rpx(94);
+      margin-left: rpx(30);
+      background-position: center center;
+      border-radius: 50%;
+    }
+    .info {
+      margin-left: rpx(30);
+      display: flex;
+      /*flex-direction: column;*/
+      /*justify-content: space-between;*/
+      line-height: rpx(38);
+      .name {
+        flex: 1;
+        font-size: rpx(34);
+      }
+      .detail {
+        flext: 2;
+        margin-left: rpx(34);
+        font-size: rpx(26);
+        color: rgba(0, 0, 0, 0.54);
+      }
+    }
+
+  }
+  .playlist {
+    font-size: 26rpx;
+    color: rgba(0,0,0,0.58);
+    border-bottom: 1px solid #ededed;
+    margin-bottom: rpx(30);
+    .item {
+      display: flex;
+      height: 100rpx;
+      padding: 20rpx;
+      align-items: center;
+      text-align: left;
+      &.even {
+        background: #fff;
+        /*border-bottom: 1px solid #ededed;*/
+        vertical-align: middle;
+      }
+      &.current {
+        background: #FAFAFA;
+        color: #4385F4;
+      }
+      .no {
+        text-align: center;
+        width: 60rpx;
+        display: flex;
+        align-items: center;
+        /*margin:0 auto;*/
+        justify-content: center;
+      }
+      .name {
+        margin: 0 auto;
+        padding-left: 34rpx;
+        overflow: hidden;
+        flex: 1;
+      }
+      .playing {
+        width: 60rpx;
+        justify-content: center;
+        vertical-align: middle;
+        align-items: center;
+        text-align: center;
+        .icon {
+          justify-content: center;
+          vertical-align: middle;
+          align-items: center;
+          text-align: center;
+          padding: 10rpx;
+          width: 24rpx;
+          height: 24rpx;
+        }
+      }
+    }
+
+  }
+  .popup__content {
+    width: 100%;
+    height: 500rpx;
+    line-height: 500rpx;
+    background: #ffffff;
+    text-align: center;
+  }
+  .readerinfo {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    margin: 0 auto;
+    padding: 10rpx;
+    height: 160rpx;
+    background: #fff;
+    border-bottom: 1px solid #ededed;
+    padding-left: 20rpx;
+    .avatar {
+      margin: 10rpx;
+      width: 90rpx;
+      height: 90rpx;
+      border-radius: 50%;
+    }
+    .author {
+      display: flex;
+      padding: 10rpx;
+      .title {
+        flex:1;
+        font-size: 28rpx;
+        display: inline-block;
+        margin-bottom: 10rpx;
+      }
+      .detail {
+        flex: 1;
+        display: inline-block;
+      }
+    }
+  }
+
+  .play {
+    width: 100rpx;
+    height: 100rpx;
+    display: block;
+    margin-right: 34rpx;
+    .action image {
+      width: 100rpx;
+      height: 100rpx;
+    }
+  }
+  .quick {
+    width: 100%;
+    position:fixed;
+    bottom: 0;
+    height: rpx(120);
+    /*right: rpx(30);*/
+    z-index: 100;
+    /*display: flex;*/
+    /*flex-flow: row;*/
+    /*align-items: flex-end;*/
+    /*vertical-align: middle;*/
+    padding-bottom: rpx(20);
+    background-image: linear-gradient(-180deg, rgba(238,238,238,0.00) 0%, #FFFFFF 50%);
+
+    &__actions {
+      float: right;
+      display: inline-flex;
+      align-items: center;
+      margin-right: rpx(20);
+      &--player {
+        width: rpx(100);
+        height: rpx(100);
+      }
+      &--share {
+        margin-right: rpx(20);
+        width: rpx(54);
+        height: rpx(54);
+      }
+    }
+  }
+  .replies {
+    &__header {}
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    &__list {
+    }
+    &__item {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      &-user {
+        display: flex;
+        height: auto;
+        &--avatar {
+          width: rpx(76);
+          height: rpx(76);
+          background-position: center center;
+          border-radius: rpx(12);
+          border: 1px solid #efefef;
+        }
+      }
+      &-info {
+        flex: 1;
+        margin-left: rpx(30);
+        &__nicename {
+          color: $blue-dark;
+          display: inline-flex;
+        }
+        &--date {
+          float: right;
+          color: $gray;
+          font-size: rpx(24);
+        }
+        &__content {
+          color: $gray;
+        }
+      }
+    }
+  }
+  #quickbar{
+    position:fixed;
+    bottom: 60rpx;
+    right: 5rpx;
+    z-index: 100;
+    /* Mask: */
+    border-top: 1px solid rgba(255,255,255,0.60);
+    box-shadow: 0 4px 20px 0 rgba(0,0,0,0.20);
+    /* Photo Copy: */
+    font-size: 24rpx;
+    /*box-sizing: border-box;*/
+    white-space:nowrap;
+    display: flex;
+  }
+</style>
+
+<template>
+
+  <view class="body">
+    <view id="anchor">
+    <image class="avatar" src="{{detail.author.avatar}}" backbround-size="cover" mode="aspectFill"></image>
+    <view class="info">
+      <text class="name">{{detail.author.nicename}}</text>
+      <text class="detail">{{detail.author.resume.highlights}}</text>
+    </view>
+  </view>
+    <view class="book-content">
+    <view class="bookinfo">
+      <image class="cover" src="{{detail.featured_image}}" background-size="cover" mode="aspectFill"></image>
+      <view class="detail">
+        <text class="title">{{detail.title}}</text>
+        <text class="author">{{detail.content}}</text>
+      </view>
+    </view>
+    <view id="timeline" wx:if="{{playing}}">
+      <!--<text class="time">{{playtime}}</text>-->
+      <progress percent="{{downloadPercent}}" stroke-width="1"  color="#fafafa">
+        <text id="playstate" style="left:{{percent}}%"></text>
+        <text id="dpstate" style="width:{{percent}}%"></text>
+        <slider @change="museek" color="#d33a31" left-icon="cancel" value="{{percent}}"/>
+      </progress>
+      <!--<text id="endtime" class="time">{{duration}}</text>-->
+    </view>
+
+  </view>
+    <view class="playlist" style="margin-bottom: 10px;">
+      <block wx:for="{{list}}" wx:for-item="song" wx:key="index">
+        <view class="item even {{curplay.id === song.id ? 'current': ''}}"
+              @tap="playItem({{song}}, {{index}})">
+          <view class="no" wx:if="{{!(curplay.id === song.id)}}">{{ index + 1 }}.</view>
+
+          <view class="playing" wx:if="{{playing && curplay.id === song.id}}">
+            <image class="icon" src="../../images/status/pause_mini.png"></image>
+          </view>
+          <view class="playing" wx:if="{{!playing && curplay.id === song.id}}">
+            <image class="icon" src="../../images/status/play_mini.png"></image>
+          </view>
+          <view class="song-name">{{song.title}}</view>
+
+        </view>
+
+      </block>
+    </view>
+
+    <view class="card is-expanded">
+      <view id="user" @tap="bindButtonTap">
+        <image class="avatar" src="{{userInfo.avatarUrl}}" backbround-size="cover" mode="aspectFill"></image>
+        <view class="info">
+          <text>说说您的想法...</text>
+        </view>
+      </view>
+    </view>
+    <view class="replies">
+      <view class="card is-compact replies__header">
+        {{ replies.data.length }} 条评论
+      </view>
+      <view class="replies__list">
+        <block wx:for="{{replies.data}}" wx:key="index" wx:for-item="item">
+          <view class="card is-compact replies__item">
+            <view class="replies__item-user" @tap="bindButtonTap">
+              <image class="replies__item-user--avatar" src="{{item.author.avatar}}" backbround-size="cover" mode="aspectFill"></image>
+            </view>
+            <view class="replies__item-info">
+              <view class="replies__item-info__nicename">
+                {{item.author.nicename}}
+              </view>
+              <view class="replies__item-info--date">
+                {{item.date}}
+              </view>
+              <view class="replies__item-info__content">
+                {{item.content}}
+              </view>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view style="height: 160rpx;"></view>
+    <!--<form bindsubmit="bindFormSubmit">-->
+      <!--<textarea placeholder="form 中的 textarea" name="textarea"/>-->
+      <!--<button form-type="submit"> 提交 </button>-->
+    <!--</form>-->
+    <!--<form bindsubmit="bindFormSubmit" style="position: fixed; bottom: 0;">-->
+      <view class="quick">
+        <!--<view class="quick__input">-->
+          <!--<textarea @blur="bindTextAreaBlur" focus="{{focus}}" @focus="bindTextAreaFocus" name="content" value="{{content}}" auto-height placeholder="写下您的想法..." />-->
+        <!--</view>-->
+        <!--<view class="quick__actions" wx:if="{{focus}}">-->
+          <!--<button class="quick__submit" formType="submit" wx:if="{{focus}}">发送</button>-->
+        <!--</view>-->
+        <view class="quick__actions">
+          <image class="quick__actions--share" src="../../images/quick/share.png" @tap="share"></image>
+          <image class="quick__actions--player" src="../../images/quick/play_big.png" hidden="{{playing}}" @tap="playAll"></image>
+          <image class="quick__actions--player" src="../../images/quick/pause_big.png" hidden="{{!playing}}" @tap="pauseAll"></image>
+        </view>
+      </view>
+    <!--</form>-->
+
+  </view>
+</template>
+<script>
+  /* eslint-disable no-undef,no-unused-vars,spaced-comment */
+  import wepy from 'wepy'
+  import base from '../../mixins/_base'
+//  import pagination from '../../mixins/pagination'
+  import Tips from '../../utils/Tips'
+
+  import podcastApi from '../../api/podcast'
+  import Card from '../../components/FoldableCard'
+  import Popup from '../../components/ui/p-popup/index'
+  const $wxapp = wepy.$instance
+  import audioManager from '../../mixins/audioManager'
+
+  let seek = 0
+  import auth from '../../api/auth'
+
+  export default class Detail extends wepy.page {
+    components = {
+      card: Card,
+      popup: Popup
+    }
+    mixins = [base, audioManager]
+    data = {
+      userInfo: {
+        nickName: '加载中...',
+        // 头像占位图
+        avatarUrl: 'data:image/png;base64,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',
+        packages: {
+          times: 0,
+          status: '阅读状态'
+        },
+        identity: {
+          type: '订阅状态',
+          collection: 0
+        }
+      },
+      content: '',
+      focus: false,
+      isExpanded: true,
+      detail: {},
+      list: [],
+      animationData: null,
+//      }),
+//      item: {
+//        play_status: 'stop'
+//      },
+      src: '',
+      mode: 'loop',
+      loading: true,
+      downloadPercent: 0,
+      percent: 50,
+      // playing: false,
+      curplay: {
+        play_status: 'stop'
+      },
+      replies: {
+        data: []
+      }
+    }
+    props = {
+      option: Object
+    }
+    computed = {
+      playing () {
+        return this.curplay.play_status === 'playing'
+      }
+    }
+    methods = {
+      async bindFormSubmit (e) {
+        Tips.loading('提交中...')
+        this.content = e.detail.value.content
+        const data = await podcastApi.repliesNew(this.detail.id, this.content)
+//        console.log(JSON.stringify(data))
+        Tips.loaded()
+        this.replies.data.unshift(data)
+        this.content = ''
+        this.$apply()
+      },
+      bindButtonTap: function() {
+        this.$root.$redirect(`/pages/detail/comment?postId=${this.detail.id}`)
+//        this.focus = true
+//        this.$apply()
+      },
+      bindTextAreaBlur: function(e) {
+        this.focus = false
+      },
+      bindTextAreaFocus (e) {
+        if (!this.focus) {
+          this.focus = true
+        }
+      },
+      showPopup () {
+        this.$invoke('popup', 'show')
+      },
+      share() {
+        wx.showShareMenu({
+          withShareTicket: true
+        })
+      },
+      pauseAll() {
+//        this.playing = false
+//        console.log(JSON.stringify(this.curplay))
+        if (this.curplay.play_status === 'playing') {
+          this.curplay.play_status = 'stop'
+          $wxapp.pauseMusic()
+        }
+//        this.$apply()
+      },
+      playAll() {
+//        this.playing = true
+        $wxapp.globalData.playlist = this.list
+        this.curplay.play_status = 'playing'
+        $wxapp.globalData.curplay = Object.assign({}, this.list[0], {play_status: 'playing'})
+        this.curplay = $wxapp.globalData.curplay
+        $wxapp.globalData.playindex = 0
+        $wxapp.playing()
+        $wxapp.emitter.emit('playing')
+//        this.$apply()
+      },
+      playItem(audio, index) {
+//        console.log(this.curAudio.id + '----' + audio.id)
+        if (this.curAudio.id === audio.id) {
+          this.play()
+          if (this.playing) {
+            this.curplay.play_status = 'pause'
+          } else {
+            this.curplay.play_status = 'playing'
+          }
+          // this.playing = !this.playing
+        } else {
+          this.curplay.play_status = 'playing'
+          const curAudio = {
+            id: audio.id,
+            albumId: this.detail.id,
+            epname: this.detail.title,
+            title: audio.title,
+            singer: audio.author.nicename,
+            avatar: audio.author.avatar,
+            coverImgUrl: this.detail.featured_image,
+            src: audio.url,
+            playStatus: 'playing'
+          }
+          this.curplay.id = audio.id
+          if ($wxapp.audioStore.getAlbum() !== this.detail) {
+            $wxapp.audioStore.setAlbum(this.detail)
+            $wxapp.emitter.emit('change-album')
+          }
+          $wxapp.audioStore.setAudio(curAudio)
+          $wxapp.audioStore.setCurIndex(index)
+          $wxapp.emitter.emit('change-audio')
+          this.playTarget()
+        }
+//        wx.showToast({
+//          title: '加载中',
+//          icon: 'loading',
+//          duration: 1000
+//        })
+//
+//        if (this.curplay.id === song.id) {
+////          console.log('当前暂停')
+//          if (this.curplay.play_status === 'playing') {
+//            this.curplay.play_status = 'stop'
+//            $wxapp.stopMusic()
+//          } else {
+//            this.curplay.play_status = 'playing'
+//            $wxapp.playing()
+//          }
+//        } else {
+//          this.curplay.play_status = 'playing'
+//          this.curplay = Object.assign({}, song, {play_status: 'playing'})
+//          $wxapp.globalData.curplay = this.curplay
+//          $wxapp.playing()
+//        }
+//        $wxapp.emitter.emit('playing')
+      },
+      museek (e) {
+        let nextime = e.detail.value
+        const that = this
+        nextime = $wxapp.globalData.curplay.dt * nextime / 100000
+        $wxapp.globalData.currentPosition = nextime
+        $wxapp.seekMusic(1, $wxapp.globalData.currentPosition, () => {
+          this.percent = e.detail.value
+          that.$apply()
+        })
+      }
+    }
+    async onShow() {
+      const result = await auth.user({block: true, redirect: true})
+      if (!result) return
+      this.userInfo = JSON.parse($wxapp.globalData.auth.user)
+      this.loaded()
+
+      const that = this
+      if (that.curplay.play_status === 'playing') {
+        $wxapp.playAlrc(that)
+        seek = setInterval(() => {
+          $wxapp.playAlrc(that)
+        }, 1000)
+      }
+      if (this.curplay.play_status === 'stop') {
+        clearInterval(seek)
+      }
+    }
+    onShareAppMessage () {
+      return {
+        title: '育儿柚道',
+        desc: this.item.name,
+        path: '/pages/detail?id=' + this.item.id
+      }
+    }
+    async getReplies (id) {
+      this.replies = await podcastApi.getReplies(id)
+    }
+    async getDetail(id) {
+      this.detail = await podcastApi.detail(id)
+    }
+    async getList(id, items) {
+      const data = await podcastApi.list(items)
+      // console.log(JSON.stringify(data))
+      this.list = data
+      this.detail.list = data
+      this.$apply()
+      // this.list = data.data
+      // console.log(JSON.stringify(data))
+      // const cur = this.list.find((item) => {
+      //   if (item.id.toString() === id) {
+      //     return item
+      //   }
+      // })
+      // this.curplay = Object.assign({}, cur, {play_status: 'stop'})
+    }
+    async onLoad(option) {
+      // 测试专用数据
+//      option = {
+//        id: 1,
+//        parent: 1
+//      }
+      await this.getDetail(option.id)
+      await this.getList(option.id, this.detail.items)
+      this.loaded()
+      await this.getReplies(option.id)
+      this.loaded()
+
+//      const that = this
+//      $wxapp.emitter.on('playing', (e) => {
+//        that.curplay = $wxapp.globalData.curplay
+//        if (that.curplay.play_status === 'playing') {
+//          $wxapp.playAlrc(that)
+//          seek = setInterval(() => {
+//            $wxapp.playAlrc(that)
+//          }, 1000)
+//        }
+//        if (that.curplay.play_status === 'stop') {
+//          clearInterval(seek)
+//        }
+//      })
+//      that.$apply()
+    }
+  }
+</script>

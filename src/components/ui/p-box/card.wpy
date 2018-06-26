@@ -1,0 +1,235 @@
+<style lang="scss">
+  @import "../../../stylesheets/style";
+
+  .example--box {
+    z-index:0;
+    display:block;
+    position:relative;
+    margin:30rpx 30rpx 0 30rpx;
+    box-sizing:border-box;
+    background:#fff;
+    box-shadow:0 5px 10px 0 rgba(0,0,0,0.05);
+    border-radius:12rpx;
+  }
+  .right {
+    display: flex;
+    justify-content:flex-end;
+    margin-top: 30rpx;
+  }
+  .answer {
+    width: auto;
+    height: 160rpx;
+    display: flex;
+    float: right;
+    align-self: flex-end;
+    color: #A1a1a1;
+
+    &__bubble {
+      align-self: flex-start;
+      /*top: 0;*/
+      min-width: rpx(400);
+      height: rpx(100);
+      box-sizing: border-box;
+      background: #fefefe;
+      border-top-right-radius: 20rpx;
+      border-bottom-left-radius: 20rpx;
+      box-shadow: 0 0 0 1px transparentize(lighten($gray, 30%), .10), 0 2px 4px lighten($gray, 30%);
+      /*width: auto;*/
+      transform: translate(rpx(30));
+      margin-right: rpx(32);
+      padding: rpx(24);
+      /*display: flex;*/
+      /*flex-direction: row;*/
+      display: inline-flex;
+      align-items: center;
+      &__player {
+        width: rpx(64);
+        height: rpx(64);
+        flex: 1;
+        text-align: left;
+      }
+      text {
+        flex: 2;
+        text-align: right;
+      }
+    }
+    &__author {
+      align-self: flex-end;
+      width: 72rpx;
+      height: 72rpx;
+      border: 1px solid #F2F4F8;
+      border-radius: 8rpx;
+      margin: 20rpx;
+      image {
+        width: 72rpx;
+        height: 72rpx;
+      }
+    }
+
+  }
+  .demo{
+    padding: 30rpx;
+    /* background: #f6f6f6; */
+  }
+
+  .demo-inner{
+    background: #fff;
+  }
+
+  .meta {
+    position: relative;
+    border-top: 1rpx solid #e9e9e9;
+    padding: 20rpx 15rpx 15rpx 20rpx;
+  }
+
+  .meta-title {
+    position: absolute;
+    top: -24rpx;
+    line-height: 26rpx;
+    padding: 10rpx 14rpx;
+    font-size: 26rpx;
+    color: #555;
+    border-radius: 8rpx;
+    background: #f2f2f2;
+    transition: background-color .4s ease;
+  }
+
+  .meta-desc {
+    margin-top: 20rpx;
+    color: #777;
+    font-size: 28rpx;
+  }
+
+  .example--source {
+    position: relative;
+  }
+
+  .view-btn{
+    position: absolute;
+    right: 20rpx;
+    top: -52rpx;
+    color: #369;
+    opacity: .5;
+    font-size: 26rpx;
+  }
+</style>
+
+<template>
+  <view class="example--box">
+    <view class="example--demo demo">
+      <view class="demo-inner">
+        <slot></slot>
+      </view>
+    </view>
+    <view class="example--meta meta">
+      <!--<view class="meta-title">{{title}}</view>-->
+      <view class="meta-desc">{{desc}}</view>
+    </view>
+    <view class="right">
+      <view class="answer">
+        <view class="answer__bubble">
+          <!-- 有播放状态的专辑 -->
+          <image class="gridicon answer__bubble__player" src="../../../images/icon/icon-music-pause-mini.svg" @tap="playItem({{audio}})"
+                 wx:if="{{(curplay.id === audio.id && curplay.play_status === 'playing')}}"></image>
+          <image class="gridicon answer__bubble__player" src="../../../images/icon/icon-music-play-mini.svg" @tap="playItem({{audio}})"
+                 wx:if="{{(curplay.id === audio.id && curplay.play_status === 'stop')}}"></image>
+          <!-- 没有状态的专辑 -->
+          <image class="gridicon answer__bubble__player" src="../../../images/icon/icon-music-play-mini.svg"  @tap="playItem({{audio}})"
+                 wx:if="{{(curplay.id !== audio.id)}}"></image>
+          <!--<slot name="audio"></slot>-->
+          <text>01:00</text>
+        </view>
+        <view class="answer__author">
+          <slot name="author"></slot>
+        </view>
+      </view>
+    </view>
+
+    <!--<view class="example&#45;&#45;source">-->
+      <!--<view class="view-btn {{viewSourceClass}}" @tap="bindViewSourceEvent">{{ isExpandSource ? 'Hide' : 'Show' }} Code</view>-->
+      <!--<content wx:if="{{isExpandSource}}" content="{{source}}" type="demo"></content>-->
+    <!--</view>-->
+  </view>
+</template>
+
+<script>
+  /* eslint-disable no-undef */
+
+  import wepy from 'wepy'
+  const $wxapp = wepy.$instance
+
+  import Content from './content'
+  export default class Demo extends wepy.component {
+    components = {
+      content: Content
+    }
+    props = {
+      audio: {
+        type: Object,
+        twoWay: true
+      },
+      title: {
+        type: String,
+        value: '示例标题'
+      },
+      desc: {
+        type: String,
+        value: '示例描述'
+      },
+      source: {
+        type: String,
+        value: ''
+      }
+    }
+
+    data = {
+      viewSourceClass: 'source-isclose',
+      isExpandSource: false,
+      curplay: {
+        id: ''
+      }
+    }
+    methods = {
+      playItem (audio) {
+//        console.log(JSON.stringify(audio))
+        wx.showToast({
+          title: '加载中',
+          icon: 'loading',
+          duration: 1000
+        })
+        if (this.curplay.id === audio.id) {
+          if (this.curplay.play_status === 'playing') {
+            this.curplay.play_status = 'stop'
+            $wxapp.pauseMusic()
+          } else {
+            this.curplay.play_status = 'playing'
+            $wxapp.playing()
+          }
+        } else {
+          $wxapp.stopMusic()
+          this.curplay.play_status = 'playing'
+          this.curplay = Object.assign({}, {play_status: 'playing'}, audio.list[0])
+          this.curplay.id = audio.id
+          console.log(JSON.stringify(this.curplay))
+          $wxapp.globalData.curplay = this.curplay
+          $wxapp.playing()
+        }
+      },
+      bindViewSourceEvent () {
+        this.isExpandSource = !this.isExpandSource
+      }
+    }
+    onLoad () {
+      $wxapp.emitter.on('audio_toggle', ({playing, curplay}) => {
+        this.playing = playing
+//        clearInterval(seek)
+//        $wxapp.playStatus(that)
+//        seek = setInterval(() => {
+//          $wxapp.playStatus(that)
+//        }, 1000)
+        this.curplay = curplay
+        this.$apply()
+      })
+    }
+  }
+</script>

@@ -1,0 +1,167 @@
+
+<template>
+  <mask :status.sync="maskStatus"></mask>
+  <view class="popup popup__status--{{status}} popup__content-align--{{align}} popup__status--{{status}}--animotion-{{animationMode}}" @tap="hide">
+    <slot></slot>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import Mask from '../p-mask/index'
+  export default class Card extends wepy.component {
+    components = {
+      mask: Mask
+    }
+    props = {
+      animationMode: {
+        type: String,
+        twoWay: true
+      },
+      align: {
+        type: String,
+        default: 'center'
+      },
+      status: {
+        type: String,
+        default: 'hide',
+        twoWay: true
+      }
+    }
+    data = {
+      maskStatus: 'hide'
+//      status: 'hide'
+    }
+    showMask() {
+      this.maskStatus = 'show'
+    }
+    hideMask() {
+      this.maskStatus = 'hide'
+    }
+    forceHide() {
+      this.status = 'hide'
+      this.hideMask()
+    }
+    methods = {
+      async show() {
+        const that = this
+        if (that.animationMode !== 'none') {
+          that.showMask()
+          that.status = 'fadeIn'
+//          that.status = 'show'
+          setTimeout(() => {
+            this.status = 'show'
+            this.$apply()
+          }, 50)
+        } else {
+          that.showMask()
+          that.status = 'show'
+        }
+      },
+      hide() {
+        const that = this
+        if (that.animationMode !== 'none') {
+          this.status = 'fadeOut'
+          clearTimeout(that._timer)
+
+          that._timer = setTimeout(() => {
+            that.forceHide()
+            this.$apply()
+          }, 300)
+        } else {
+          // 没有动画
+          that.forceHide()
+        }
+      },
+      onContentTap() {}
+    }
+  }
+</script>
+<style lang="scss">
+  .popup {
+    position: fixed;
+    z-index: 200000;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    overflow: hidden;
+
+    &__status {
+      &--hide {
+        display: none;
+      }
+      &--show {
+        display: flex;
+        transition: all 300ms linear;
+      }
+      &--fadeOut {
+        display: flex;
+        transition: all 300ms linear;
+
+        &--animotion-none {}
+        &--animotion-center {
+          width: 0;
+          height: 0;
+        }
+        &--animotion-top {
+          top: -100%;
+        }
+        &--animotion-bottom {
+          transform: translate(-50%, 50%);
+        }
+        &--animotion-left {
+          left: -100%;
+        }
+        &--animotion-right {
+          transform: translate(50%, -50%);
+        }
+      }
+      &--fadeIn {
+        display: flex;
+
+        &--animotion-none {}
+        &--animotion-center {
+          width: 0;
+          height: 0;
+        }
+        &--animotion-top {
+          top: -100%;
+        }
+        &--animotion-bottom {
+          transform: translate(-50%, 50%);
+        }
+        &--animotion-left {
+          left: -100%;
+        }
+        &--animotion-right {
+          transform: translate(50%, -50%);
+        }
+      }
+    }
+    &__content-animotion {}
+    &__content-align {
+      &--center {
+        align-items: center;
+        justify-content: center;
+      }
+      &--top {
+        align-items: flex-start;
+        justify-content: center;
+      }
+      &--bottom {
+        align-items: flex-end;
+        justify-content: center;
+      }
+      &--left {
+        align-items: center;
+        justify-content: flex-start;
+      }
+      &--right {
+        align-items: center;
+        justify-content: flex-end;
+      }
+    }
+  }
+</style>

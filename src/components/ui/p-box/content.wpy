@@ -1,0 +1,61 @@
+<template>
+  <view class="example__md example__md--{{type}}">
+    <rich-text nodes="{{content}}"></rich-text>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class elip extends wepy.component {
+    props = {
+      type: { // doc or demo
+        type: String,
+        value: 'doc'
+      },
+      content: {
+        type: String | Array,
+        value: ''
+      }
+    }
+
+    data = {
+      viewSourceClass: 'source-isclose',
+      isExpandSource: false
+    }
+    methods = {
+      bindViewSourceEvent () {
+        this.setData({
+          isExpandSource: !this.data.isExpandSource
+        })
+      }
+    }
+    onLoad () {
+      // let { content, isRawCode } = this.data
+      // content = decodeURIComponent(content)
+      // if (isRawCode) {
+      //   content = '``` html \r\n' + content + '\r\n```'
+      // }
+      // content = marked(content)
+      // content = content.replace(/\<(|\/)pre\>/ig, '')
+      // content = content.replace(/\n/g, '<br/>')
+      // content = content.replace(/  /g, '<span class="tab-1"></span>')
+      // // content = markdownFormat(content)
+      // console.log(content)
+      // this.setData({
+      //   nodes: content
+      // })
+    }
+  }
+</script>
+<style>
+  .example__md {
+    color: #555;
+    font-size: 24rpx;
+  }
+  .example__md--demo{
+    display: block;
+    background: #f6f6f6;
+    padding: 20rpx;
+  }
+</style>

@@ -1,0 +1,29 @@
+@mixin setArrow($direction, $arrowSize, $borderColor, $borderWidth) {
+  display: inline-block;
+  height: $arrowSize;
+  width: $arrowSize;
+  border-width: $borderWidth $borderWidth 0 0;
+  border-color: $borderColor;
+  border-stype: solid;
+  @if $direction == 'top' {
+    transform: matrix(0.71,-0.71,0.71,0.71,0,0); // rotate(-45deg)
+  }
+  @if $direction == 'right' {
+    transform: matrix(0.71,0.71,-0.71,0.71,0,0); // rotate(45deg);
+
+    position: relative;
+    top: -2px;
+  }
+  @if $direction == 'down' {
+    transform: matrix(-0.71,0.71,-0.71,-0.71,0,0); // rotate(135deg);
+
+    position: relative;
+    top: -3px;
+  }
+  @if $direction == 'left' {
+    transform: matrix(-0.71,-0.71,0.71,-0.71,0,0); // rotate(-135deg);
+
+    position: relative;
+    top: -2px;
+  }
+}

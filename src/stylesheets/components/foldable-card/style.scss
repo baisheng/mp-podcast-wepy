@@ -1,0 +1,241 @@
+// ==========================================================================
+// Clear fix mixin (clearfix)
+// ==========================================================================
+$white:                  rgba(255,255,255,1);
+$gray:                   #A1a1a1;
+$gray-light:             lighten( $gray, 33% ); //#f3f6f8
+$gray-dark:              darken( $gray, 38% ); //#2e4453
+$gray-text:              $gray-dark;
+$gray-text-min:          darken( $gray, 18% ); //#537994
+@mixin clear-fix {
+  &:after {
+    content: ".";
+    display: block;
+    height: 0;
+    width: 0;
+    clear: both;
+    visibility: hidden;
+  }
+}
+// Alerts
+$alert-yellow:           #f0b849;
+$alert-red:              #F26175;
+$alert-green:            #4ab866;
+$alert-purple:           #855DA6;
+// Primary Accent (Blues)
+$blue-wordpress:         #3B4859;
+$blue-light:             #EFF2F7;
+$blue-medium:            #3B7CFF;
+$link-highlight:         tint($blue-medium, 20%);
+$breakpoints: 480px, 660px, 960px, 1040px, 1280px, 1600px; // Think very carefully before adding a new breakpoint
+@mixin setArrow($direction, $arrowSize, $borderColor, $borderWidth) {
+  display: inline-block;
+  height: $arrowSize;
+  width: $arrowSize;
+  border-width: $borderWidth $borderWidth 0 0;
+  border-color: $borderColor;
+  border-stype: solid;
+  @if $direction == 'top' {
+    transform: matrix(0.71,-0.71,0.71,0.71,0,0); // rotate(-45deg)
+  }
+  @if $direction == 'right' {
+    transform: matrix(0.71,0.71,-0.71,0.71,0,0); // rotate(45deg);
+
+    position: relative;
+    top: -2px;
+  }
+  @if $direction == 'down' {
+    transform: matrix(-0.71,0.71,-0.71,-0.71,0,0); // rotate(135deg);
+
+    position: relative;
+    top: -3px;
+  }
+  @if $direction == 'left' {
+    transform: matrix(-0.71,-0.71,0.71,-0.71,0,0); // rotate(-135deg);
+
+    position: relative;
+    top: -2px;
+  }
+}
+
+// Multisite
+.foldable-card.card {
+  @include clear-fix;
+  position: relative;
+  transition: margin .15s linear;
+  padding: 0;
+
+  &.is-expanded {
+    margin: 30rpx 0;
+  }
+}
+
+.foldable-card__header {
+  min-height: 64px;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+
+  &.is-clickable {
+    cursor: pointer;
+  }
+
+  &.has-border{
+    .foldable-card__summary,
+    .foldable-card__summary-expanded {
+      margin-right: 16rpx;
+    }
+
+    .foldable-card__expand {
+      border-left: 1px $gray-light solid;
+    }
+  }
+
+  .foldable-card.is-compact & {
+    padding: 8px 16px;
+    min-height: 40px;
+  }
+
+  .foldable-card.is-expanded & {
+    margin-bottom: 0px;
+    height: inherit;
+    min-height: rpx(100);
+  }
+
+  .foldable-card.is-expanded.is-compact & {
+    min-height: 40px;
+  }
+
+  .foldable-card.is-disabled & {
+    opacity: 0.2;
+  }
+}
+
+.foldable-card__action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+
+  .foldable-card.is-expanded & {
+    height: 100%;
+  }
+
+  .foldable-card.is-disabled & {
+    cursor: default;
+  }
+
+  .accessible-focus &:focus {
+    outline: thin dotted;
+  }
+}
+.in-access {
+  padding-right: 13px;
+  position: absolute;
+  &:after {
+    content: " ";
+    @include setArrow(right, 6px, #c8c8c8, 2px);
+    position: absolute;
+    top: 50%;
+    margin-top: -4px;
+    right: 2px;
+  }
+}
+button.foldable-card__action {
+  cursor: pointer;
+}
+
+.foldable-card__main {
+  max-width: calc( 100% - 36rpx );
+  display: flex;
+  align-items: center;
+  margin-right: 5px;
+  flex: 1 1;
+}
+
+.foldable-card__secondary {
+  display: flex;
+  align-items: center;
+  flex: 1 1;
+  justify-content: flex-end;
+}
+
+.foldable-card__expand {
+  width: 48px;
+
+  .gridicon {
+    fill: $gray;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    vertical-align: middle;
+
+    transition: transform .15s cubic-bezier(0.175, .885, .32, 1.275), color .20s ease-in;
+
+    .foldable-card.is-expanded & {
+      transform: rotate( 180deg );
+    }
+  }
+
+  .gridicon:hover {
+    fill: $gray;
+  }
+
+  &:hover .gridicon {
+    fill: $blue-medium;
+  }
+}
+
+.foldable-card__content {
+  display: none;
+
+  .foldable-card.is-expanded & {
+    display: block;
+    padding: 16px;
+    border-top: 1px solid $gray-light;
+
+
+    .foldable-card.is-compact & {
+      padding: 8px;
+    }
+  }
+}
+.foldable-card__summary,
+.foldable-card__summary-expanded {
+  margin-right: 10px;
+  color: $gray-text-min;
+  font-size: 12px;
+  transition: opacity 0.2s linear;
+  display: inline-block;
+
+  .foldable-card.has-expanded-summary & {
+    transition: none;
+    flex: 2;
+    text-align: right;
+  }
+}
+
+
+.foldable-card__summary {
+  opacity: 1;
+  display: inline-block;
+
+  .foldable-card.is-expanded & {
+    display: none;
+    .has-expanded-summary & {
+      display: none;
+    }
+  }
+}
+
+.foldable-card__summary-expanded {
+  display: none;
+
+  .foldable-card.is-expanded & {
+    display: inline-block;
+  }
+}

@@ -1,0 +1,155 @@
+<template>
+  <view style="height: 600px">
+
+    <!--<p-label>lalala</p-label>-->
+    <scroll-view
+      scroll-y style="height: 600px;"
+      @scrolltoupper="scrollToTop"
+      @scrolltolower="scrollToBottom"
+      @scroll="scroll" upper-threshold="0"
+      lower-threshold="0"
+      @touchstart="touchStart"
+      @touchend="touchEnd">
+      <view wx:if="{{isRefresh}}" class="refresh_root">
+        <view>
+          <text>正在刷新...</text>
+        </view>
+      </view>
+      <view class="tab_item">
+        <repeat for="{{page.list}}" key="index" index="index" item="item">
+          <!--<p-box title="item.title" desc="item.content">-->
+            <p-card title="item.title" desc="item.content" :audio="item">
+              <p-label wx:if="{{index === 0 }}">育儿</p-label>
+              <p-label wx:if="{{index === 0}}">学习</p-label>
+              <p-label wx:if="{{index === 1 }}">情绪管理</p-label>
+              <p-label wx:if="{{index === 1}}">胆小</p-label>
+              <image class="" mode="aspectFill" src="{{item.author.avatar}}" slot="author"> </image>
+            </p-card>
+          <!--</p-box>-->
+          <!--<question-card :item.sync="item" :id="item.id"></question-card>-->
+        </repeat>
+        <!-- 加载提示 -->
+        <Loadmore :page.sync="page"></Loadmore>
+        <view style="height: 100rpx;"></view>
+      </view>
+      <!--</view>-->
+    </scroll-view>
+  </view>
+</template>
+<script>
+  /* eslint-disable no-trailing-spaces */
+
+  import wepy from 'wepy'
+  import Loadmore from '../components/ui/loadmore'
+//  import PodcastCard from '../components/podcast-card'
+  import base from '../mixins/_base'
+  import pagination from '../mixins/pagination'
+  import Cache from '../utils/Cache'
+  import pBox from '../components/ui/p-box/index'
+  import pCard from './ui/p-box/card'
+  import pLabel from '../components/ui/p-label/index'
+//  import app from '../api/app'
+
+  import podcast from '../api/podcast'
+
+  import Tips from '../utils/Tips'
+
+  export default class List extends wepy.component {
+    mixins = [base, pagination]
+
+    components = {
+      'p-box': pBox,
+      'p-card': pCard,
+      'p-label': pLabel,
+      'Loadmore': Loadmore
+//      'question-card': PodcastCard
+    }
+    props = {
+      list: {}
+    }
+    data = {
+      swiper: {},
+      page: {
+        added: [],
+        list: []
+      },
+      list: [
+        {
+          id: '0',
+          title: 'loading'
+        }
+      ]
+    }
+
+    methods = {
+      scrollToTop () {
+        this.scrollStatus = 'top'
+//        this.reload()
+        console.log('top')
+      },
+      async scrollToBottom () {
+        this.scrollStatus = 'bottom'
+        console.log('bottom')
+        await this.next()
+      },
+      scroll () {
+        this.scrollStatus = 'scrolling'
+        console.log('scrolling...')
+      },
+      async touchStart (e) {
+        const touchPoint = e.touches[0]
+        const clientY = touchPoint.clientY
+        this.clientY = clientY
+//        if (this.clientY > 50) {
+//          this.isRefresh = true
+//        }
+      },
+      async touchEnd (e) {
+        const upPoint = e.changedTouches[0]
+        const endY = upPoint.clientY
+        const pointTopintY = Math.abs(endY - this.clientY)
+        const status = this.scrollStatus
+        // 上拉刷新
+        if (status === 'top' && pointTopintY > 50) {
+//          this.isRefresh = true
+          this.reload()
+        }
+        // 上拉加载
+        if (status === 'bottom' && pointTopintY > 50) {
+          this.isLoadMore = true
+          await this.next()
+        }
+        // 两秒后隐藏加载条
+        setTimeout(() => {
+          this.isRefresh = false
+          this.isLoadMore = false
+        }, 3000)
+      }
+    }
+    async onShow () {
+      this.$root.$parent.emitter.on('liked', (item) => {
+        for (let i of this.page.list) {
+          if (i.id === item.id) {
+            i.i_like = item.i_like
+            i.like_count = item.like_count
+          }
+        }
+        Tips.success(item.i_like ? '已收藏' : '已取消')
+        this.$apply()
+      })
+
+      this.app = await Cache.app()
+      this.swiper = this.app.options.swiper
+
+      this.page = podcast.page('youda')
+      await this.next()
+      this.loaded()
+    }
+  }
+</script>
+<style lang="scss">
+  .label {
+    margin-right: 20rpx;
+  }
+
+</style>

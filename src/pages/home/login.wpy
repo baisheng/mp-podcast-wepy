@@ -1,0 +1,207 @@
+<template>
+  <view wx:if="{{init}}">
+    <!-- 头图区域 -->
+    <view class="user-info-container">
+      <!--<image class="user-avatar" src="{{app.avatar}}" />-->
+      <text class="user-nickname">{{app.name}}</text>
+      <text class="user-desc">用户信息授权</text>
+    </view>
+
+
+    <view class="zan-panel">
+      <view class="zan-btns">
+        <button open-type="getUserInfo" class="zan-btn zan-btn--fill" bindgetuserinfo="confirm" wx:if="{{reInfo}}" >确认授权</button>
+        <button class="zan-btn zan-btn--fill" @tap="tips" wx:else >确认授权</button>
+        <button class="zan-btn" @tap="back">随便逛逛</button>
+      </view>
+    </view>
+
+    <Copyright />
+  </view>
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import auth from '../../api/auth'
+  import Cache from '../../utils/Cache'
+  import base from '../../mixins/base'
+  import Tips from '../../utils/Tips'
+  import WxUtils from '../../utils/WxUtils'
+
+  export default class UserLogin extends wepy.page {
+    def = {
+      redirect: 'false',
+      init: false,
+      app: {},
+      reInfo: null,
+      reAuth: null
+
+    };
+    data = {...this.def};
+    async onLoad ({redirect}) {
+      this.redirect = redirect
+      this.app = await Cache.app()
+      this.reInfo = WxUtils.canIUse('button.open-type.getUserInfo')
+      this.loaded()
+    };
+    methods = {
+      async confirm({detail}) {
+        if (detail.rawData) {
+          await auth.user({block: false, redirect: false}, detail)
+          Tips.success('授权成功')
+          if (this.redirect === 'true') {
+            this.$redirect('/pages/index')
+          } else {
+            wepy.navigateBack()
+          }
+        } else {
+          Tips.error('授权失败')
+        }
+      },
+      back() {
+        wepy.navigateBack()
+      },
+      tips() {
+        Tips.modal('微信版本过低，请更新微信，或在列表删除小程序后重新访问')
+      }
+    }
+    events = {
+    }
+    components = {}
+    mixins = [base]
+    config = {
+      navigationBarTitleText: '用户授权'
+    };
+  }
+</script>
+
+<style lang="scss">
+  @import "../../stylesheets/variable";
+  /*有赞样式文件*/
+  /*@import "variable";*/
+  .zan-btn {
+    color: #333;
+    background-color: #fff;
+    margin-bottom: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    font-size: 16px;
+    line-height: 45px;
+    height: 45px;
+    box-sizing: border-box;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .zan-btn::after {
+    display: none;
+  }
+
+  .zan-btn--primary {
+    color: $color-primary;
+    background-color: #fff;
+    border-color: $color-primary;
+  }
+
+  .zan-btn--warn {
+    color: #fff;
+    background-color: $color-warn;
+    border-color: $color-warn;
+  }
+
+  .zan-btn--danger {
+    color: $color-danger;
+    background-color: #fff;
+    border-color: $color-danger;
+  }
+
+  .zan-btn--fill {
+    background-color: #3B4859;
+    color:#FFF;
+  }
+  .zan-btn--plain.zan-btn--fill {
+    background-color: $color-primary;
+    color:#FFF;
+  }
+
+  .zan-btn--small {
+    display: inline-block;
+    height: 30px;
+    line-height: 29px;
+    font-size: 13px;
+    margin-left: 0px;
+    margin-right: 5px;
+    margin-bottom: 0;
+  }
+  .zan-btn--mini {
+    display: inline-block;
+    line-height: 21px;
+    height: 22px;
+    font-size: 10px;
+    margin-right: 5px;
+    margin-left: 0px;
+    margin-bottom: 0;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .zan-btn--large {
+    border-radius: 0;
+    margin-bottom: 0;
+    border: none;
+    line-height: 50px;
+    height: 50px;
+  }
+
+  .zan-btns {
+    margin: 15px;
+  }
+
+  .zan-btn.zan-btn--disabled {
+    /* 防止样式被 button[disabled] 的规则覆盖，所以使用了important */
+    color: #999 ! important;
+    background: #f8f8f8 ! important;
+    border-color: #e5e5e5 ! important;
+    cursor: not-allowed ! important;
+    opacity: 1 ! important;
+  }
+
+  .zan-panel {
+    background: #fff;
+    border-top: 1rpx solid #e5e5e5;
+    border-bottom: 1rpx solid #e5e5e5;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  /*用户信息*/
+  .user-info-container{
+    color: #3B4859;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 400rpx;
+    background-color: #fafafa;
+    padding-left: 50rpx;
+    padding-right: 50rpx;
+  }
+  .user-avatar{
+    height:160rpx;
+    width: 160rpx;
+    border-radius: 50%;
+  }
+
+  .user-nickname{
+    color: #3B4859;
+    font-size: 40rpx;
+  }
+
+  .user-desc{
+    color: #3B4859;
+    font-size: 30rpx;
+    margin-top: 30rpx;
+  }
+</style>

@@ -1,0 +1,104 @@
+// Primary Accent (Blues)
+$blue-wordpress:         #3B4859;
+$blue-light:             #EFF2F7;
+$blue-medium:            #3B7CFF;
+// 30385a
+// 393D4F
+$primary: #3B7CFF;
+$secondary: #30385a;
+
+$dark: #161b21;
+$blue-dark:              adjust-color($dark, $blue: 8);
+$darkBlue: adjust-color($dark, $blue: 8);
+
+$dark90: mix(#fff, $darkBlue, 10%);
+$dark80: mix(#fff, $darkBlue, 20%);
+$dark60: mix(#fff, $darkBlue, 40%);
+$dark40: mix(#fff, $darkBlue, 60%);
+$dark25: mix(#fff, $darkBlue, 75%);
+
+$shadow: adjust-color($dark, $blue: 20);
+
+$border: #D1D7E4;
+$line: #E8EBF4;
+$light: #F5F6FA;
+
+$success: #69DD95;
+$error: #F26175;
+$info: $secondary;
+
+// Jetpack Green
+$green-jetpack:          #8cc258;
+
+// Grays
+// #8c92ac Cool Grey
+// 91a3b0
+// 6699cc
+//$gray:                     #8392A7;
+//$gray-light: #F9FAFC;
+//$gray-dark: #3B4859;
+$gray:                   #A1a1a1;
+$gray-light:             lighten( $gray, 33% ); //#f3f6f8
+$gray-dark:              darken( $gray, 38% ); //#2e4453
+
+// $gray-text: ideal for standard, non placeholder text
+// $gray-text-min: minimum contrast needed for WCAG 2.0 AA on white background
+$gray-text:              $gray-dark;
+$gray-text-min:          darken( $gray, 18% ); //#537994
+
+// $gray color functions:
+// lighten( $gray, 10% ) //#a8bece
+// lighten( $gray, 20% ) //#c8d7e1
+// lighten( $gray, 30% ) //#e9eff3
+// darken( $gray, 10% ) //#668eaa
+// darken( $gray, 20% ) //#4f748e
+// darken( $gray, 30% ) //#3d596d
+//
+// See wordpress.com/design-handbook/colors/ for more info.
+
+// Secondary Accent (Oranges)
+$orange-jazzy:           #f0821e;
+$orange-fire:            #d54e21;
+
+// Alerts
+$alert-yellow:           #f0b849;
+$alert-red:              #F26175;
+$alert-green:            #4ab866;
+$alert-purple:           #855DA6;
+
+// Link hovers
+$link-highlight:         tint($blue-medium, 20%);
+
+// Essentials
+$white:                  rgba(255,255,255,1);
+$transparent:            rgba(255,255,255,0);
+
+// Uncommon
+$border-ultra-light-gray: #e8f0f5;
+
+// Layout
+$masterbar-color:          $blue-wordpress;
+//$sidebar-bg-color:         lighten( $gray, 30% );
+$sidebar-bg-color:         #F5F6FA;
+$sidebar-text-color:       $gray-dark;
+$sidebar-selected-color:   $gray-text-min;
+
+
+//Social media colors
+$color-facebook: #39579a;
+$color-twitter: #55ACEE;
+$color-gplus: #df4a32;
+$color-tumblr: #35465c;
+$color-linkedin: #0976b4;
+$color-path: #df3b2f;
+$color-instagram: #d93174;
+$color-eventbrite: #ff8000;
+$color-stumbleupon: #eb4924;
+$color-reddit: #5f99cf;
+$color-pinterest: #cc2127;
+$color-pocket: #ee4256;
+$color-email: #f8f8f8;
+$color-print: #f8f8f8;
+$color-skype: #00AFF0;
+$color-telegram: #0088cc;
+$color-whatsapp: #43d854;

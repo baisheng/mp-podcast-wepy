@@ -1,0 +1,198 @@
+<script>
+  /* eslint-disable no-undef,spaced-comment */
+
+  import wepy from 'wepy'
+  import Tips from '../utils/Tips'
+  //  import audioStore from '../utils/audioStore'
+  const $wxapp = wepy.$instance
+  let globalAudio = $wxapp.globalAudioManager
+  let audioStore = $wxapp.audioStore
+  /**
+   * 分页通用方法
+   */
+  export default class audioManager extends wepy.mixin {
+    config = {}
+    components = {}
+
+    onLoad () {
+      $wxapp.emitter.on('audio-time-update', () => {
+//        Tips.loaded()
+        Tips.loaded()
+        this.percent = $wxapp.audioStore.getPercent()
+//        console.log(this.percent)
+        this.$apply()
+      })
+      $wxapp.emitter.on('change-album', () => {
+        this.playList = audioStore.getAlbum().list
+        this.$apply()
+      })
+      $wxapp.emitter.on('change-audio', () => {
+        this.curAudio = audioStore.getAudio()
+        this.$apply()
+      })
+      $wxapp.emitter.on('audio-play', () => {
+        this.curAudio = audioStore.getAudio()
+        this.$apply()
+      })
+//      $wxapp.emitter.on('audio-stop', () => {
+//        this.curAudio = audioStore.getAudio()
+//        this.$apply()
+//      })
+//      $wxapp.emitter.on('audio-stop', () => {
+//        this.curAudio = audioStore.getAudio()
+//        this.$apply()
+//      })
+      this.initBgAudioManager()
+
+      globalAudio.onPlay(() => {
+//        this.playing = true
+        Tips.loaded()
+        this.curAudio = audioStore.getAudio()
+        this.curAudio.playStatus = 'playing'
+
+        this.$apply()
+      })
+      globalAudio.onStop(() => {
+        this.curAudio = audioStore.getAudio()
+        this.curAudio.playStatus = 'stop'
+        this.$apply()
+      })
+      globalAudio.onPause(() => {
+        console.log('音频系统暂停')
+        this.curAudio.playStatus = 'pause'
+        this.$apply()
+      })
+//      globalAudio.onWaiting(() => {
+//        Tips.loading()
+//        this.emitter.emit('audio-waiting')
+//      })
+      globalAudio.onEnded(() => {
+//        console.log('播放自然结束')
+        this.playNext()
+      })
+    }
+    playTarget () {
+      globalAudio.changeAudio()
+    }
+    play () {
+      let status = globalAudio.paused
+      if (status === undefined || !globalAudio.currentTime) {
+        globalAudio.changeAudio()
+        this.curAudio.playStatus = 'playing'
+      }
+      if (status) {
+        this.curAudio.playStatus = 'playing'
+        globalAudio.play()
+      } else {
+        this.curAudio.playStatus = 'pause'
+        globalAudio.pause()
+      }
+    }
+
+    pause () {
+      this.curAudio.playStatus = 'pause'
+      globalAudio.pause()
+    }
+
+    stop () {
+      this.curAudio.playStatus = 'stop'
+      globalAudio.stop()
+    }
+    _playControl (cb, action, pos) {
+      this.stop()
+      const album = audioStore.getAlbum()
+      this.playList = album.list
+      this.playIndex = audioStore.getCurIndex()
+      if (action === 'prev') {
+        this.playIndex--
+      } else {
+        this.playIndex++
+      }
+      this.playIndex = this.playIndex > this.playList.length - 1 ? 0 : (this.playIndex < 0 ? this.playList.length - 1 : this.playIndex)
+      this.playIndex = pos !== undefined ? pos : this.playIndex
+      audioStore.setCurIndex(this.playIndex)
+      const audioItem = this.playList[this.playIndex]
+      const audio = {
+        id: audioItem.id,
+        epname: album.title,
+        title: audioItem.title,
+        singer: audioItem.author.nicename,
+        avatar: audioItem.author.avatar,
+        coverImgUrl: album.featured_image,
+        src: audioItem.url,
+        playStatus: 'playing'
+      }
+      audioStore.setAudio(audio)
+      this.curAudio = audioStore.getAudio()
+      this.curAudio.playStatus = 'playing'
+      $wxapp.emitter.emit(`audio-play-${action}`)
+      globalAudio.changeAudio()
+      typeof cb === 'function' && cb()
+    }
+    playPrev (cb, pos) {
+      this._playControl(cb, 'prev', pos)
+    }
+    playNext (cb, pos) {
+      this._playControl(cb, 'next', pos)
+    }
+    initBgAudioManager () {
+//      const component = this
+      const self = globalAudio
+      const options = {
+        onWaiting () {
+          Tips.loading('音频加载中...')
+          this.isWaiting = true
+        },
+        onTimeUpdate () {
+          if (this.isWaiting) {
+            this.isWaiting = false
+            Tips.loaded()
+          }
+          const currentTime = self.currentTime
+          // 当前播放进度
+          const currentProcess = $wxapp.formatDuration(currentTime * 1000)
+          const duration = $wxapp.formatDuration(self.duration * 1000)
+          // 当前播放百分比
+          const percent = currentTime / self.duration * 100
+          $wxapp.audioStore.setCurrentProcess(currentProcess)
+          $wxapp.audioStore.setPercent(percent)
+          $wxapp.audioStore.setDuration(duration)
+          $wxapp.emitter.emit('audio-time-update')
+        },
+        changeAudio () {
+          const {id, epname, title, coverImgUrl, singer, src} = audioStore.getAudio()
+          self.title = title
+          self.epname = epname
+          self.audioId = id
+          self.coverImgUrl = coverImgUrl
+          self.singer = singer || '育儿柚道'
+          if (!src) {
+            Tips.toast('音频加载失败', null, 'warning')
+          } else {
+            self.src = src
+          }
+        }
+      }
+      globalAudio.changeAudio = options.changeAudio
+      globalAudio.onWaiting.call(this, options.onWaiting)
+      globalAudio.onTimeUpdate.call(this, options.onTimeUpdate)
+//      globalAudio = decorateBgAudioManager(globalAudio, options)
+    }
+
+    methods = {}
+    events = {}
+//    onLoad () {
+//    }
+    data = {
+      album: {},
+      playList: [],
+      playIndex: 1,
+//      playing: false,
+      curAudio: {},
+      currentProcess: '00:00',
+      duration: '00:00',
+//      currentTime: 0,
+      percent: 0
+    };
+  }
+</script>

@@ -1,0 +1,430 @@
+<style lang="scss" scoped>
+  @import '../stylesheets/style';
+
+  $fontcolor: #7b7b7b;
+  $activecolor: #2196F3;
+  .scrollable {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    .container {
+      height: 100%;
+      will-change: transform;
+      position: absolute;
+      .item {
+        height: 100%;
+        position: relative;
+        float: left;
+        box-sizing: border-box;
+        flex-flow: column;
+        .item-self {
+          position: absolute;
+          box-sizing: border-box;
+          margin: 30rpx 18rpx;
+          overflow: hidden;
+          padding: 20rpx;
+          width: 95%;
+          color: #aaa;
+          background-color: white;
+          box-shadow: 0 4rpx 30rpx 0rpx rgba(0, 0, 0, 0.05);
+          border-radius: 5px;
+          display: flex;
+          flex-flow: column;
+          flex-direction: column;
+          align-items:center;
+        }
+      }
+    }
+  }
+  $fontcolor: #5B5B5B;
+  $activecolor: #2196F3;
+  .tab {
+    color: $fontcolor;
+    width: rpx(698);
+    /*border-radius: rpx(8);*/
+    /*border-radius: rpx(200);*/
+    border-radius: rpx(20);
+    /*border-bottom-left-radius: rpx(30);*/
+    /*border-bottom-right-radius: rpx(30);*/
+    /*border-top-left-radius: rpx(12);*/
+    /*border-top-right-radius: rpx(12);*/
+    margin-left: rpx(20);
+    background: #FFFFFF;
+    /*z-index: 100;*/
+    height: rpx(100);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.10) inset, /*左边阴影*/
+    0 2px 8px rgba(0, 0, 0, 0.20); /*右边阴影*/
+    padding: rpx(6);
+    white-space: nowrap;
+    .tab_item {
+      /*border-left: 1px solid rgba(0, 0, 0, 0.05);*/
+      display: flex;
+      flex-flow: column;
+      /*display: inline-block;*/
+      width: 25%;
+      text-align: center;
+      align-content: center;
+      align-items: center;
+      padding: rpx(6);
+      height: rpx(100);
+      .icon {
+        display: flex;
+        width: rpx(48);
+        height: rpx(48);
+      }
+      .icon-title {
+        font-size: rpx(24);
+      }
+      .icon-active {
+        color: #476DDC;
+      }
+    }
+
+    .player {
+      height: rpx(100);
+      width: 100%;
+      overflow: hidden;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      line-height: initial;
+
+      &-pic {
+        margin: rpx(6);
+        /*margin-right: rpx(12);*/
+        border-radius: rpx(100);
+        /*margin: rpx(1) rpx(20) rpx(2) rpx(1);*/
+        /*border-top-left-radius: rpx(12);*/
+        /*border-radius: rpx(100);*/
+        border: 1px solid #efefef;
+        /*border-top-left-radius: rpx(12);*/
+        position: relative;
+        float: left;
+        height: rpx(88);
+        width: rpx(88);
+        box-shadow: 0 rpx(4) rpx(10) 0 rgba(0, 0, 0, 0.05);
+        /*background-image: url(data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQAB…KeMAnLCf8ACCCAzE5d8ZHMS64IIA7oy+HDqgggIEpYdUZJnpE84IICeScSJYwQQE8IIIID/9k=);*/
+        /*background-size: 100%;*/
+        -webkit-transition: all 0.3s ease;
+        transition: all 0.3s ease;
+      }
+      &-info {
+        margin-left: rpx(84);
+        padding: rpx(16) 0 0 rpx(8);
+        height: rpx(100);
+        box-sizing: border-box;
+      }
+      &-audio {
+        position: relative;
+        display: flex;
+
+        &-info_wrap {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+          .title {
+            color: #4285F4;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            text-shadow: 0 0 2px rgba(0,0,0,.15);
+          }
+          .author {
+            line-height: rpx(44);
+            white-space: nowrap;
+            font-size: rpx(24);
+            color:#666;
+            &:before {
+              content: '- '
+            }
+          }
+        }
+
+        &-controller {
+          position: relative;
+          right: 0;
+          margin-left: rpx(20);
+          padding-right: rpx(30);
+          display: flex;
+          /*height: 100%;*/
+          align-items: center;
+          .play {
+            float: left;
+            justify-content: center;
+            vertical-align: middle;
+            align-items: center;
+          }
+          .action {
+            display: inline-block;
+            width: rpx(64);
+            height: rpx(64);
+          }
+        }
+      }
+
+    }
+    @-webkit-keyframes AnimationName {
+      0% {
+        background-position: 100% 0%;
+      }
+      100% {
+        background-position: 0% 0%;
+      }
+    }
+    .arrow {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: #fff;
+      height: rpx(100);
+      text-align: center;
+      width: rpx(52);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-top: 1px solid #f5f5f5;
+      box-sizing: border-box;
+      border-left: 1px solid #f5f5f5;
+      image {
+        width: rpx(24);
+        height: rpx(24);
+      }
+    }
+    /*.play {*/
+      /*display: flex;*/
+      /*width: rpx(200);*/
+      /*height: 100%;*/
+    /*}*/
+
+    #timeline{
+      position: fixed;
+      /*bottom: 0;*/
+      display: flex;
+      /*width: rpx(710);*/
+      z-index: 10;
+      left: rpx(18);
+      right: rpx(18);
+
+      .time {
+        display: block;
+        font-size: rpx(20);
+        color: rgba(0, 0, 0, 0.38);
+        z-index: 3;
+        text-align: center;
+        width: rpx(100);
+      }
+      progress {
+        width: rpx(685);
+        /*margin-left: 10rpx;*/
+        /*margin-right: 10rpx;*/
+        margin: 0 auto;
+        position: relative;
+        border-radius: rpx(4);
+      }
+      #dpstate {
+        position: absolute;
+        height: 3px;
+        background: #4385F4;
+        overflow: hidden;
+        left: 0;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        /*top: 50%;*/
+        margin-top: -1px;
+      }
+    }
+  }
+</style>
+<template>
+
+  <view class="tab">
+
+    <view class="player" wx:if="{{showToolbar}}">
+      <image class="player-pic " src="{{curAudio.avatar}}" mode="" />
+      <view class="player-info">
+        <view class="player-audio">
+          <view class="player-audio-info_wrap" @tap="tap">
+            <text class="title">{{curAudio.title}}</text>
+            <text class="author">{{curAudio.singer}}</text>
+          </view>
+          <view class="player-audio-controller ">
+            <view class="play">
+              <image class="action" src="../images/icon/icon-music-{{playing ? 'pause': 'play'}}-mini.svg" @tap="toggle"></image>
+              <image class="action" src="../images/icon/icon-music-play-next-mini.svg" @tap="playNext" wx:if="{{playList.length > 1}}"></image>
+              <!--<text>{{currentProcess}} / {{duration}} / {{playing}}</text>-->
+            </view>
+          </view>
+        </view>
+      </view>
+
+    </view>
+    <view id="timeline" wx:if="{{playing}}">
+      <progress percent="{{percent}}" stroke-width="2" activeColor="#aaa" backgroundColor="#fefefe" active>
+        <text id="dpstate" style="width:{{percent}}%"></text>
+      </progress>
+    </view>
+  </view>
+</template>
+<script>
+  /* eslint-disable no-undef,no-throw-literal,no-extra-bind,no-extra-parens,no-unused-vars,spaced-comment,no-trailing-spaces */
+
+  import wepy from 'wepy'
+  import podcast from '../api/podcast'
+  import base from '../mixins/_base'
+  import audioManager2 from '../mixins/audioManager'
+  const $wxapp = wepy.$instance
+  const device = wx.getSystemInfoSync()  //  获取设备信息
+  const DEFAULT = {
+    /**
+     * 必填项
+     */
+    slideLength: 3,                       //  由于目前无法直接获取slide页数，目前只能通过参数写入
+    /**
+     * 可选参数
+     */
+    width: device.windowWidth,
+    height: device.windowHeight,
+    speed: 300,
+    timingFunction: 'ease',               //  过渡动画速度曲线
+    directionViewName: 'directionClass',   //  对应视图中direction类名
+    animationViewName: 'tabAnimationData',   //  对应视图中animation属性名
+    /**
+     * 事件回调
+     * @type {[type]}
+     */
+    onInit: null,                         //  swiper初始化时执行
+    onChange: null
+  }
+  let seek = 0
+
+  export default class Tab extends wepy.component {
+    mixins = [base, audioManager2]
+
+    props = {
+      active: {
+        twoWay: true,
+        type: Number
+      },
+      curplay: {
+        twoWay: true,
+        type: Object
+      },
+      option: {
+        type: Object,
+        twoWay: true
+      }
+    }
+    data = {
+      width: device.windowWidth,
+      height: device.windowHeight,
+      showToolbar: true,
+//      playing: false,
+      tabAnimationData: null,
+      animationViewName: 'tabAnimationData',
+      XORY: 'Y',
+      downloadPercent: 0,
+//      percent: 0,
+//      currentProcess: '00:00',
+      start: 100,
+      end: 0
+//      curAudio: {}
+    }
+    watch = {
+//      curplay (newValue, oldValue) {
+//        console.log(newValue.id + 'new value id')
+//      }
+    }
+
+    computed = {
+      playing () {
+        return this.curAudio.playStatus === 'playing'
+      }
+    }
+//    decorateBgAudio ()
+    methods = {
+      tap () {
+        wx.navigateTo({
+          url: `/pages/detail/index?id=${this.curAudio.id}&parent=${this.curAudio.albumId}`,
+          success (res) {
+          }
+        })
+      },
+      toggle () {
+//        console.log('play....')
+        this.play()
+      },
+      playNext() {
+        this.playNext()
+      },
+      change (idx, e) {
+        const {onChange} = this
+        typeof onChange === 'function' && onChange(this, e) //  当手指碰触到slide时执行
+        this.active = +idx
+//        if (this.active === 1) {
+//          this.$invoke('./profile', 'onShow')
+//        }
+        $wxapp.emitter.emit('tab-change', this.active)
+        this.$apply()
+      },
+      playingToggle () {
+        this.playing = !this.playing
+      }
+    }
+
+    /**
+     * 同步设置到视图
+     * @param DEFAULT：默认参数
+     * @param param：构造参数
+     */
+    syncView (viewName, prop) {
+      this[`${viewName}`] = prop
+      this.$apply()
+    }
+
+    initTab () {
+      const {onInit} = this
+      typeof onInit === 'function' && onInit(this)
+    }
+
+    onLoad () {
+      // 加载推荐的内容
+      $wxapp.emitter.on('stickys-onload', (stikcy) => {
+        (async () => {
+          if (!Object.is(stikcy.items, undefined)) {
+            const data = await podcast.detail(stikcy.items[0].id)
+            this.loaded()
+//          this.curplay = data.data[0]
+//           console.log(JSON.stringify(data))
+            const audio = data
+            // this.playList = data
+//          console.log(JSON.stringify(this.playList))
+            this.curAudio = {
+              id: audio.id,
+              albumId: stikcy.id,
+              avatar: audio.author.avatar,
+              epname: stikcy.title,
+              title: audio.title,
+              singer: audio.author.nicename,
+              coverImgUrl: stikcy.featured_image,
+              src: audio.url,
+              playStatus: 'stop'
+//          webUrl
+            }
+            $wxapp.audioStore.setAudio(this.curAudio)
+            this.loaded()
+            this.$apply()
+          }
+        })()
+      })
+
+      const {option} = this
+      const CONFIG = Object.assign(this, DEFAULT, option)
+      this.initTab(CONFIG)
+    }
+  }
+</script>
