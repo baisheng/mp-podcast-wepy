@@ -24,6 +24,9 @@ A Podcast miniprogram project, 一款播课类小程序
 ### MpVue 版本
 > [https://github.com/baisheng/mp-podcast-mpvue](https://github.com/baisheng/mp-podcast-mpvue)
 
+### Podcast 服务端
+> [https://github.com/baisheng/podcast-server](https://github.com/baisheng/podcast-server)
+
 # podcast
 <img src="https://github.com/baisheng/mp-podcast-wepy/blob/master/doc/1.png?raw=true" alt="Podcast" title="首页精选" width="375" />
 <img src="https://github.com/baisheng/mp-podcast-wepy/blob/master/doc/2.png?raw=true" alt="Podcast" title="柚答" width="375" />
